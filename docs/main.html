@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+
+</head>
+
+<body>
+
+<div id="loading">
+    <img src="images/鳥生獅子連中＿loading.png" alt="ローディング" class="loading-img rotating">
+</div>
+
+<div id="globalLoading" class="loading-overlay" style="display:none;">
+    <img src="images/鳥生獅子連_詳細ローディング.gif" alt="読み込み中…">
+</div>
+
+<div id="main-content" style="display:none;">
+    <div class="bottom-nav">
+        <button data-tab="home" class="bottom-nav-btn active">
+            <i class="fas fa-home"></i><span>ホーム</span>
+        </button>
+
+        <button data-tab="event" class="bottom-nav-btn">
+            <i class="fas fa-book-open"></i><span>イベント</span>
+        </button>
+
+        <button data-tab="chat" class="bottom-nav-btn">
+        <i class="fas fa-paw"></i><span>ししまる</span>
+        </button>
+
+        <button data-tab="calendar" class="bottom-nav-btn">
+            <i class="fas fa-calendar-alt"></i><span>カレンダー</span>
+        </button>
+
+        <button data-tab="user" class="bottom-nav-btn">
+            <i class="fas fa-user"></i><span>ユーザー</span>
+        </button>
+    </div>
+</div>
+
+
+
+<!-- ==== ホーム画面 ==== -->
+<div class="tab-content active" id="home">
+    <div class="nav-title">
+        <h1>ホーム</h1>
+        <button class="reload-btn" title="更新">
+        <i class="fas fa-sync-alt"></i>
+        </button>
+    </div>
+    <div class="contents">
+    <div class="event-status">進行中のイベント</div>
+    <div id="home-schedule"></div>
+    </div>
+</div>
+
+<!-- ==== イベント画面 ==== -->
+<div class="tab-content" id="event">
+    <div  class="nav-title">
+        <h1>イベント</h1>
+        <button class="reload-btn" title="更新">
+        <i class="fas fa-sync-alt"></i>
+        </button>
+    </div>
+    <div class="contents">
+        <div class="event-status">進行中のイベント</div>
+        <div id="event-active-schedule"></div>
+        <div class="event-status">過去のイベント</div>
+        <div id="event-past-schedule"></div> 
+    </div>
+</div>
+
+<!-- ===== AIチャット画面 ===== -->
+<div class="tab-content" id="chat">
+    <div class="nav-title">
+        <h1>ししまる</h1>
+    </div>
+
+    <div class="contents">
+        <div id="ai-chat-area">
+        </div>
+
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="メッセージを入力">
+            <button id="chat-send-btn">送信</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==== カレンダー画面 ==== -->
+<div class="tab-content" id="calendar">
+    <div  class="nav-title">
+        <h1>カレンダー</h1>
+        <button class="reload-btn" title="更新">
+        <i class="fas fa-sync-alt"></i>
+        </button>
+    </div>
+    <div class="contents">
+        <div class="calendar-form">
+            <div id="calendarArea"></div>
+            <div id="eventArea"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ==== ユーザー画面 ==== -->
+<div class="tab-content" id="user">
+    <div  class="nav-title">
+        <h1>ユーザー</h1>
+        <button class="reload-btn" title="更新">
+            <i class="fas fa-sync-alt"></i>
+        </button>
+    </div>
+    <div class="contents">
+        <div class="top-instagram">
+            <a href="https://www.instagram.com/toriu_shishi" target="_blank">
+                <img src="images/インスタグラムアイコン.png" class="insta-icon">
+            </a>
+        </div>
+
+        <div class="menu">
+            <section class="section">
+                <p class="section-title">ユーザーメニュー</p>
+                <ul class="tab-list">
+                    <li class="tab-item" data-target="member">メンバー</li>
+                </ul>
+            </section>
+        </div>
+
+        <div class="admin-menu">
+            <section class="section">
+                <p class="section-title">管理者メニュー</p>
+                <ul class="tab-list">
+                    <li class="tab-item" data-target="member-management">メンバー管理</li>
+                    <li class="tab-item" data-target="event-management">イベント管理</li>
+                    <li class="tab-item" data-target="practice-management">練習日管理</li>
+                </ul>
+            </section>
+        </div>
+    </div>
+</div>
+
+<!-- 詳細カード HTML -->
+<div id="hidecontents">
+
+    <!-- イベント詳細カード -->
+    <div class="event-detail-card" id="eventDetailCard">
+
+        <button class="close-card-btn" data-target="event">戻る</button>
+        <button class="edit-event-btn" data-target="edit-event">編集</button>
+
+        <div class="event-detail-card-title"></div>
+
+        <div class="event-detail-card-time">
+        <div class="event-detail-card-date"></div>
+        <div class="event-detail-card-time-text"></div>
+        <div class="event-detail-card-location"></div>
+        </div>
+
+        <div class="event-detail-card-responses">
+        <div class="response-btn-group">
+            <button class="response-btn yes">参加</button>
+            <button class="response-btn no">不参加</button>
+        </div>
+
+        <div class="event-detail-card-comment"></div>
+
+        <div class="response-section yes">
+            <button class="toggle-response-btn yes">参加者</button>
+            <ul class="response-list yes"></ul>
+        </div>
+
+        <div class="response-section no">
+            <button class="toggle-response-btn no">不参加者</button>
+            <ul class="response-list no"></ul>
+        </div>
+
+        <div class="response-section na">
+            <button class="toggle-response-btn na">未回答者</button>
+            <ul class="response-list na"></ul>
+        </div>
+
+        <button class="toggle-performances-btn">演目一覧</button>
+        <ul class="performance-list"></ul>
+        </div>
+    </div>
+
+    <!-- 練習詳細カード -->
+    <div class="practice-detail-card" id="practiceDetailCard">
+
+        <button class="close-card-btn" data-target="practice">戻る</button>
+
+        <div class="practice-detail-card-title"></div>
+
+        <div class="practice-detail-card-time">
+            <div class="practice-detail-card-date"></div>
+            <div class="practice-detail-card-time-text"></div>
+            <div class="practice-detail-card-location"></div>
+        </div>
+
+        <div class="practice-detail-card-responses">
+
+            <div class="response-btn-group">
+                <button class="response-btn absent">欠席</button>
+                <button class="response-btn late">遅れて参加</button>
+            </div>
+
+            <div class="practice-detail-card-comment"></div>
+
+            <div class="response-section absent">
+                <button class="toggle-response-btn absent">欠席</button>
+                <ul class="response-list absent"></ul>
+            </div>
+
+            <div class="response-section late">
+                <button class="toggle-response-btn late">遅れて参加</button>
+                <ul class="response-list late"></ul>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- イベント新規作成 -->
+    <div class="event-create-card" id="eventCreateCard">
+
+        <button class="close-card-btn" data-target="create">戻る</button>
+
+        <div class="event-create-card-type">
+            <label>イベントタイプ</label>
+            <div class="event-type-options">
+                <label><input type="radio" name="eventType" value="festival" /> 祭り</label>
+                <label><input type="radio" name="eventType" value="regular" /> イベント</label>
+            </div>
+        </div>
+
+        <div class="event-create-card-title">
+            <label for="eventTitle">タイトル</label>
+            <input type="text" id="eventTitle" placeholder="イベントタイトルを入力" />
+        </div>
+
+        <div class="event-create-card-time">
+            <label for="eventDate">日付</label>
+            <input type="date" id="eventDate" />
+            <label for="eventTime">時間</label>
+            <input type="time" id="eventTime" />
+        </div>
+
+        <div class="event-create-card-location">
+            <label for="eventLocation">場所</label>
+            <input type="text" id="eventLocation" placeholder="場所を入力" />
+        </div>
+
+        <div class="event-create-card-comment">
+            <label for="eventComment">連絡事項</label>
+            <textarea id="eventComment" placeholder="連絡事項を入力"></textarea>
+        </div>
+
+        <div class="event-create-card-performances">
+            <label>演目</label>
+            <div id="performanceList"></div>
+            <button type="button" id="addPerformanceBtn">演目を追加</button>
+        </div>
+
+        <button class="save-event-btn">保存</button>
+    </div>
+
+    <!-- 練習日新規作成 -->
+    <div class="event-create-card" id="practiceCreateCard">
+
+        <button class="close-card-btn" data-target="practice-create">戻る</button>
+
+        <div class="event-create-card-title">
+            <label for="practiceTitle">タイトル</label>
+            <input type="text" id="practiceTitle" placeholder="例：通常練習" />
+        </div>
+
+        <div class="event-create-card-time">
+            <label for="practiceDate">日付</label>
+            <input type="date" id="practiceDate" />
+            <label for="practiceStart">開始時間</label>
+            <input type="time" id="practiceStart" />
+            <label for="practiceEnd">終了時間</label>
+            <input type="time" id="practiceEnd" />
+        </div>
+
+        <div class="event-create-card-location">
+            <label for="practiceLocation">場所</label>
+            <input type="text" id="practiceLocation" placeholder="場所を入力" />
+        </div>
+
+        <div class="event-create-card-comment">
+            <label for="practiceComment">連絡事項</label>
+            <textarea id="practiceComment" placeholder="連絡事項を入力"></textarea>
+        </div>
+
+        <button class="save-practice-btn">保存</button>
+    </div>
+
+    <!-- メンバーカード（一般） -->
+    <div class="member-card" id="membersCardUser">
+        <div class="loading-overlay" style="display:none;">
+            <img src="images/鳥生獅子連_詳細ローディング.gif" alt="読み込み中…" />
+        </div>
+        <button class="close-card-btn" data-target="member">戻る</button>
+        <h2>メンバー一覧</h2>
+        <ul id="memberListUser"></ul>
+    </div>
+
+    <!-- メンバーカード（管理者） -->
+    <div class="member-card" id="membersCardAdmin">
+        <div class="loading-overlay" style="display:none;">
+            <img src="images/鳥生獅子連_詳細ローディング.gif" alt="読み込み中…" />
+        </div>
+        <button class="close-card-btn" data-target="member-management">戻る</button>
+        <h2>メンバー管理</h2>
+        <ul id="memberListAdmin"></ul>
+    </div>
+
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
