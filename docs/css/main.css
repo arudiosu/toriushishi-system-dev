@@ -1,0 +1,1288 @@
+body {
+    font-size: 16px; /* 基本サイズを16pxに */
+    background-color: #222222;
+    color: #FFFFFF;
+    margin: 0;
+    height: 100dvh; /* iPhoneのアドレスバー変動に対応 */
+}
+
+
+#loading {
+    position: fixed;
+    z-index: 9999;
+    background: #D32F2F;
+    width: 100vw;
+    height: 100vh;
+    top: 0; left: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.5s;
+}
+
+.loading-img {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    display: block;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #1e1e1e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 101;
+}
+
+.loading-overlay img {
+width: 120px; /* 適宜調整 */
+height: 120px;
+}
+
+/* ローディング後に表示されるメインコンテンツ */
+#main-content {
+    display: none;
+    position: relative;
+    z-index: auto;
+    padding: 40px;
+    text-align: center;
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom) + 1rem); /* ボトムナビの高さ分 */
+}
+
+
+.reload-btn {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background-color: #6e6e6e;
+    color: #fff;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.reload-btn:hover {
+    background-color: #8a8a8a;
+}
+
+.reload-btn i {
+    pointer-events: none; /* アイコンをクリック対象外に */
+}
+
+.tab-content {
+    display: none;
+    position: absolute;
+    height: 100vh;
+    top: 10%; /* nav-title の高さ分 */
+    bottom: calc(5rem + env(safe-area-inset-bottom) + 1rem); /* ボトムナビの高さ + safe-area */
+    left: 0;
+    right: 0;
+    
+    overflow: auto;  /* はみ出したらスクロール */
+    box-sizing: border-box;
+    z-index: auto;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* --- ボトムナビ --- */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: calc(5rem + env(safe-area-inset-bottom) + 1rem); /* ナビ本体 + padding分 */
+    display: flex;
+    justify-content: space-around;
+    background-color: #ffffff;
+    z-index: 20;
+}
+
+/* --- ボタン --- */
+.bottom-nav-btn {
+    flex: 1;
+    border: none;
+    background-color: #3a3a3a;
+    color: #FFFFFF;
+    text-align: center;
+    font-size: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    /* padding-bottom は子内の余白として残す場合 */
+    padding-bottom: 1rem;
+}
+
+
+.bottom-nav-btn.active i {
+    background-color: #6e6e6e;
+}
+.bottom-nav-btn i {
+    font-size: 1.5rem;
+    margin-bottom: 2px;
+    background-color: #3a3a3a;
+    width: 4.2rem;
+    height: 4.2rem;
+    border-radius: 20px; /* ← 角丸 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+.nav-title {
+    display: block;
+    width: 100%;
+    height: 10%;
+    position: fixed;
+    top: 0;
+    margin: 0;
+    padding: 0;
+    z-index: 20;
+    background-color: #3a3a3a;
+}
+
+.nav-title h1 {
+    margin: 0;
+}
+
+.contents {
+    height: calc(90% - (5rem + env(safe-area-inset-bottom) + 1rem));
+}
+
+
+/* スケルトン共通 */
+.skeleton {
+background-color: #333;
+border-radius: 12px;
+position: relative;
+overflow: hidden;
+}
+
+/* 光のアニメーション */
+.skeleton::after {
+content: "";
+position: absolute;
+top: 0; left: -150px;
+width: 150px; height: 100%;
+background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer {
+0% { left: -150px; }
+100% { left: 100%; }
+}
+
+/* スケルトンカードのサイズ */
+.skeleton-card {
+    display: flex;
+    flex-direction: column;  /* ← これで縦並びに */
+    justify-content: center;
+    width: 85%;
+    min-height: 90px;
+    margin: 12px auto;
+    padding: 12px 16px 16px;
+    border-radius: 20px;
+    position: relative;
+}
+
+
+/*====================================
+        AIチャットタブデザイン
+====================================*/
+
+/* 入力欄をボトムナビの上に固定 */
+.chat-input-area {
+position: fixed;
+bottom: calc(5rem + env(safe-area-inset-bottom) + 1rem); /* ボトムナビの高さ分上に */
+left: 0;
+width: 100%;
+display: flex;
+padding: 10px;
+background-color: #111;
+gap: 8px;
+border-top: 1px solid #333;
+z-index: 15; /* ボトムナビより上に表示 */
+box-sizing: border-box; /* パディング込みで幅100% */
+}
+
+/* 入力欄内 */
+#chat-input {
+    flex: 1 1 auto;   /* 残り幅を自動調整 */
+    min-width: 0;     /* overflow防止 */
+    padding: 10px 16px;
+    font-size: 16px;
+    border-radius: 20px;
+    border: none;
+    background-color: #222;
+    color: #fff;
+    box-sizing: border-box; /* パディング込みで幅計算 */
+}
+
+/* 送信ボタン */
+#chat-send-btn {
+flex: 0 0 auto;   /* 幅をテキスト＋paddingに固定 */
+padding: 0 16px;
+border-radius: 20px;
+border: none;
+background-color: #007aff;
+color: #fff;
+cursor: pointer;
+box-sizing: border-box;
+}
+
+
+#chat-send-btn:hover {
+background-color: #005fbb;
+}
+
+/* メッセージエリアの高さを調整 */
+#ai-chat-area {
+flex: 1;
+overflow-y: auto;
+padding: 12px;
+display: flex;
+flex-direction: column;
+gap: 10px;
+scroll-behavior: smooth;
+
+/* 入力欄が固定されるので、その分余白を下に確保 */
+padding-bottom: calc(5rem + 60px); /* ボトムナビ + 入力欄の高さ */
+}
+
+/* 既存のバブルデザイン */
+.chat-msg {
+padding: 10px 14px;
+border-radius: 20px;
+max-width: 70%;
+word-break: break-word;
+display: inline-block;
+}
+
+/* AIメッセージ用の親コンテナ */
+.chat-ai-wrapper {
+display: flex;
+align-items: flex-start;
+gap: 8px;
+margin-bottom: 12px;
+}
+
+/* AIアイコン */
+.chat-ai-wrapper .icon-img {
+width: 32px;
+height: 32px;
+border-radius: 50%;
+object-fit: cover;
+}
+
+
+/* ユーザー側メッセージ（右寄せ） */
+.chat-user {
+align-self: flex-end;
+background-color: #007aff; /* 青 */
+color: #fff;
+border-radius: 20px 20px 0 20px; /* 右上丸め */
+margin-left: auto;
+margin-right: 10px;
+}
+
+/* AI側メッセージ（左寄せ） */
+.chat-ai {
+align-self: flex-start;
+background-color: #333; /* ダークグレー */
+color: #fff;
+border-radius: 20px 20px 20px 0; /* 左上丸め */
+margin-right: auto;
+margin-left: 10px;
+}
+
+/* スクロールを最新に自動で追従（JSでscrollTop制御） */
+#ai-chat-area {
+overflow-y: auto;
+display: flex;
+flex-direction: column;
+gap: 10px;
+padding: 12px;
+padding-bottom: calc(5rem + 60px);
+scroll-behavior: smooth;
+}
+
+
+/*====================================
+        イベントカードデザイン
+====================================*/
+#home-schedule {
+    display: block;
+    position: relative; /* 親に従う通常フロー */
+    width: 100%;
+    height: 100%;
+    padding-bottom: 80px; /* bottom-nav の分 */
+    z-index: 0;
+}
+
+.event-festival, .event-regular, .event-practice {
+    display: flex;
+    flex-direction: column;  /* ← これで縦並びに */
+    justify-content: center;
+    width: 85%;
+    min-height: 90px;
+    margin: 12px auto;
+    padding: 12px 16px 16px;
+    border-radius: 20px;
+    position: relative;
+
+    /* 浮かせる影（アプリ感UP） */
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+
+    /* テキストを見やすく */
+    font-size: 1rem;
+    line-height: 1.35;
+    cursor: pointer;
+}
+
+/* 左のカラーアクセントライン */
+.event-festival::before,
+.event-regular::before,
+.event-practice::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 6px;
+    height: 100%;
+    border-radius: 20px 0 0 20px;
+    opacity: 0.8;
+}
+
+/* 色 */
+.event-festival {
+    background: #7a1515;
+    color: #fff;
+}
+.event-festival::before {
+    background: #ff4a4a;
+}
+
+.event-regular {
+    background: #1f2f7f;
+    color: #fff;
+}
+.event-regular::before {
+    background: #4d7cff;
+}
+
+.event-practice {
+    background: #dbdbdb;
+    color: #000000;
+}
+.event-practice::before {
+    background: #797979;
+}
+
+.event-status {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+/* 日付 */
+.event-date, .practice-date {
+    font-size: 0.9rem;
+    font-weight: 600;
+    opacity: 0.9;
+    margin-bottom: 2px;
+}
+
+/* タイトル */
+.event-title, .practice-title {
+    position: relative;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 4px 0 6px;
+    left: 0; top: 0;
+}
+
+/* 回答状況 */
+.responses-list {
+    position: relative;
+    font-size: 0.8rem;
+    opacity: 0.85;
+    margin-top: 4px;
+    left: 0; bottom: 0;
+}
+
+/* 自分の回答（右上にバッジみたいに配置） */
+.answer {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-weight: 600;
+    background: rgba(255,255,255,0.15);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+}
+
+.deadline {
+    position: absolute;
+    right: 8px;
+    bottom: 6px;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+
+/* =======================================================
+イベント詳細カード
+======================================================= */
+.event-detail-card {
+    position: fixed;
+    inset: 0;
+    background: #1e1e1e;
+    z-index: 99;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 70px 24px 24px;
+    gap: 16px;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+    transform: translateY(100%);
+    transition: transform 0.45s ease-out;
+    overflow-y: auto;
+}
+
+.event-detail-card.active { transform: translateY(0); }
+
+/* タイトル */
+.event-detail-card-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-top: 4px;
+    border-left: 4px solid #ff7676;
+    padding-left: 12px;
+}
+
+/* 日付・時間 */
+.event-detail-card-time {
+    padding: 16px;
+    background: #2c2c2c;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+.event-detail-card-date { color: #bbbbbb; font-size: 1.2rem; }
+.event-detail-card-time-text { font-size: 1.2rem; color: #fff; }
+
+.event-detail-card-comment {
+    border: 2px solid #636363;
+    white-space: pre-wrap;
+}
+
+/* =======================================================
+参加・不参加・未回答ボタン
+======================================================= */
+.event-detail-card-responses {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* 横並びボタン */
+.response-btn-group {
+    display: flex;
+    gap: 12px;
+}
+.response-btn-group .response-btn {
+    flex: 1;             /* 2列で幅を均等に */
+    font-size: 1rem;
+    padding: 12px 0;
+}
+
+/* ボタン共通 */
+.response-btn {
+    width: 100%;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 1rem;
+    color: #fff;
+    cursor: pointer;
+    border: none;
+    position: relative;
+    transition: 0.2s;
+}
+.response-btn.selected { transform: scale(1.05); }
+
+/* 色 */
+.response-btn.yes { background-color: #7CFF8A; }
+.response-btn.yes.selected { background-color: #00D83A; box-shadow: 0 0 10px rgba(0,255,80,0.7); }
+.response-btn.no  { background-color: #FF6E6E; }
+.response-btn.no.selected  { background-color: #FF2B2B; box-shadow: 0 0 10px rgba(255,80,80,0.7); }
+.response-btn.na  { background-color: #999; }
+.response-btn.na.selected { background-color: #555; }
+
+/* 折りたたみリスト */
+.response-list {
+    overflow-y: auto;
+    list-style: none;
+    padding-left: 0;
+    margin: 4px 0 12px 0;
+}
+.response-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    margin-bottom: 4px;
+    border-radius: 10px;
+    background: #1f1f1f;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    font-size: 1rem;
+    color: #fff;
+}
+.response-list li .count {
+    opacity: 0.8;
+    font-size: 0.95rem;
+}
+
+/* 折りたたみボタン */
+.toggle-response-btn, .toggle-performances-btn {
+    width: 100%;
+    background: #333;
+    color: #fff;
+    font-weight: bold;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.3s;
+}
+.toggle-response-btn:hover, .toggle-performances-btn:hover { background: #444; }
+.toggle-response-btn.open::after, .toggle-performances-btn.open::after { content: "▲"; float: right; }
+.toggle-response-btn::after, .toggle-performances-btn::after { content: "▼"; float: right; }
+
+
+/* =======================================================
+練習詳細カード
+======================================================= */
+.practice-detail-card {
+    position: fixed;
+    inset: 0;
+    background: #1e1e1e;
+    z-index: 99;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 70px 24px 24px;
+    gap: 16px;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+    transform: translateY(100%);
+    transition: transform 0.45s ease-out;
+    overflow-y: auto;
+}
+
+.practice-detail-card.active {
+    transform: translateY(0);
+}
+
+/* タイトル */
+.practice-detail-card-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-top: 4px;
+    border-left: 4px solid #4fa3ff; /* ← 練習用に色を青に変更（任意） */
+    padding-left: 12px;
+}
+
+/* 日付・時間 */
+.practice-detail-card-time {
+    padding: 16px;
+    background: #2c2c2c;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.practice-detail-card-date {
+    color: #bbbbbb;
+    font-size: 1.2rem;
+}
+
+.practice-detail-card-time-text {
+    font-size: 1.2rem;
+    color: #fff;
+}
+
+.practice-detail-card-location {
+    color: #ddd;
+    font-size: 1rem;
+}
+
+/* コメント */
+.practice-detail-card-comment {
+    border: 2px solid #636363;
+    white-space: pre-wrap;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+/* =======================================================
+    練習：休む・遅れる ボタン + リスト
+======================================================= */
+.practice-detail-card-responses {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* 横並びボタン */
+.practice-detail-card-responses .response-btn-group {
+    display: flex;
+    gap: 12px;
+}
+
+.practice-detail-card-responses .response-btn {
+    flex: 1;
+    font-size: 1rem;
+    padding: 12px 0;
+    width: 100%;
+    border-radius: 12px;
+    font-weight: bold;
+    color: #fff;
+    cursor: pointer;
+    border: none;
+    position: relative;
+    transition: 0.2s;
+}
+
+.practice-detail-card-responses .response-btn.selected {
+    transform: scale(1.05);
+}
+
+/* ボタン色（練習用） */
+.response-btn.absent { background-color: #f55b35; }        /* 休む */
+.response-btn.absent.selected { background-color: #FF2B2B; box-shadow: 0 0 10px rgba(255,80,80,0.7); }
+
+.response-btn.late { background-color: #1ea1a1; }          /* 遅れる */
+.response-btn.late.selected { background-color: #FFCC00; box-shadow: 0 0 10px rgba(255,220,80,0.7); }
+
+/* リスト */
+.practice-detail-card-responses .response-list {
+    overflow-y: auto;
+    list-style: none;
+    padding-left: 0;
+    margin: 4px 0 12px 0;
+}
+
+.practice-detail-card-responses .response-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    margin-bottom: 4px;
+    border-radius: 10px;
+    background: #1f1f1f;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    font-size: 1rem;
+    color: #fff;
+}
+
+/* 折りたたみ */
+.practice-detail-card-responses .toggle-response-btn {
+    width: 100%;
+    background: #333;
+    color: #fff;
+    font-weight: bold;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.3s;
+}
+
+.practice-detail-card-responses .toggle-response-btn:hover {
+    background: #444;
+}
+
+.practice-detail-card-responses .toggle-response-btn::after {
+    content: "▼";
+    float: right;
+}
+
+.practice-detail-card-responses .toggle-response-btn.open::after {
+    content: "▲";
+}
+
+
+/* ====================================
+    イベント作成カード 共通デザイン調整
+==================================== */
+.event-create-card {
+    position: fixed;
+    inset: 0;
+    background: #1e1e1e;
+    z-index: 99;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 70px 20px 40px;
+    gap: 20px;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+    transform: translateY(100%);
+    transition: transform 0.45s ease-out;
+    overflow-y: auto;
+}
+
+.event-create-card.active {
+    transform: translateY(0);
+}
+
+/* セクション全体のカード風 */
+.event-create-card > div {
+    background: #2c2c2c;
+    padding: 16px 18px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+/* ラベル共通 */
+.event-create-card label {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #e6e6e6;
+}
+
+/* 入力欄共通 */
+.event-create-card input[type="text"],
+.event-create-card input[type="date"],
+.event-create-card input[type="time"] {
+    width: 100%;
+    box-sizing: border-box;   /* ←これが必須 */
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #555;
+    background: #1f1f1f;
+    color: #fff;
+    font-size: 16px;
+}
+
+/* iPhone Safari で date/time アイコンを表示させる対策 */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);       /* 白く反転させて黒背景でも見えるように */
+    opacity: 1;
+}
+
+
+
+/* 入力ブロック（event-create-card > div）の横幅調整 */
+.event-create-card > div {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+
+/* ラジオボタン行を整える */
+.event-type-options {
+    display: flex;
+    gap: 20px;
+    margin-top: 6px;
+}
+
+.event-type-options label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 1rem;
+}
+
+/* 演目リストを見やすく */
+#performanceList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#performanceList input[type="text"] {
+    padding: 10px 12px;
+    background: #1f1f1f;
+    border: 1px solid #555;
+    border-radius: 8px;
+    color: #fff;
+}
+
+/* 演目追加ボタン */
+#addPerformanceBtn {
+    padding: 10px;
+    width: 100%;
+    background: #3a6cff;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 600;
+    margin-top: 6px;
+    cursor: pointer;
+}
+
+#addPerformanceBtn:hover {
+    opacity: 0.8;
+}
+
+/* 保存ボタンを固定＋強調 */
+.save-event-btn {
+    margin-top: 10px;
+    padding: 14px;
+    width: 100%;
+    background: #ff4f4f;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #fff;
+    cursor: pointer;
+}
+
+.save-event-btn:hover {
+    background: #ff6f6f;
+}
+
+#eventComment {
+    white-space: pre-wrap;
+    font-size: 16px;
+    height: 120px;
+    color: white;
+    background-color: #1e1e1e;
+}
+
+
+
+/* =======================================================
+演目リスト
+======================================================= */
+.performance-list {
+    max-height: 300px;
+    overflow-y: auto;
+    list-style: none;
+    padding-left: 0;
+    margin-top: 4px;
+}
+.performance-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    margin-bottom: 4px;
+    border-radius: 10px;
+    background: #1f1f1f;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    font-size: 1rem;
+    color: #fff;
+}
+.performance-list li .performance-name { font-weight: bold; }
+.performance-list li .assigned { font-size: 0.95rem; opacity: 0.85; }
+
+/* 戻るボタン */
+.close-card-btn,
+.edit-event-btn {
+    position: absolute;
+    padding: 6px 16px;
+    font-size: 1rem;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.3);
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    width: auto;
+    max-width: 150px;
+    z-index: 101;
+}
+
+.edit-event-btn {
+    display: none;
+}
+
+.close-card-btn,.edit-event-btn:hover { background: #444; }
+
+.close-card-btn {
+    top: 12px;
+    left: 12px;
+}
+.edit-event-btn {
+    top: 12px;
+    right: 12px;
+}
+
+/* =======================================================
+レスポンシブ
+======================================================= */
+@media (max-width: 480px) {
+    .event-detail-card { padding: 60px 16px 16px; }
+    .response-btn, .response-list li, .performance-list li { font-size: 0.95rem; padding: 8px 10px; }
+    .event-detail-card-title { font-size: 1.5rem; padding-left: 8px; }
+}
+
+/* 選択時にチェックマークを追加 */
+.response-btn.selected::after {
+    content: " ✔";
+    font-size: 1rem;
+    margin-left: 8px;
+}
+
+/* ===== セクション ===== */
+.section {
+    margin-bottom: 20px;
+}
+
+/* ===== リスト全体 ===== */
+.tab-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background: #1c1c1c;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* ===== リストアイテム ===== */
+.tab-item {
+    padding: 14px 16px;
+    color: #fff;
+    border-bottom: 1px solid #333;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.15s ease;
+}
+
+/* 最後の要素の下線なし */
+.tab-item:last-child {
+    border-bottom: none;
+}
+
+/* タップした時の色 */
+.tab-item:active {
+    background: #333;
+}
+
+.section-title {
+    display: block !important;
+    color: #fff !important;
+    font-size: 16px !important;
+    padding: 6px 8px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 6px !important;
+}
+
+.top-instagram {
+    width: 10%;
+    padding: 12px 16px;
+    background: #222;
+    border-radius: 12px;
+    margin-bottom: 16px;
+}
+
+.top-instagram a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.insta-icon {
+    width: 26px;
+    height: 26px;
+    vertical-align: middle;
+    margin-right: 6px;
+    border-radius: 6px;
+}
+
+.member-card {
+    position: fixed;
+    inset: 0;
+    background: #1e1e1e;
+    color: #fff;
+    padding: 70px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+    transform: translateY(100%);
+    transition: transform 0.45s ease-out;
+    overflow-y: auto;
+    z-index: 99;
+}
+
+li {
+  list-style: none; /* マーカーを消す */
+  padding-left: 0;  /* インデントを消す場合 */
+}
+
+.member-card.active {
+    transform: translateY(0);
+}
+
+/* 親アイテム */
+.member-item {
+    background: #333;
+    padding: 10px 16px;
+    padding-right: 90px;    /* ボタンのスペース */
+    border-radius: 8px;
+    margin-bottom: 8px;
+    list-style: none;
+    display: flex;           /* 横並び */
+    align-items: center;     /* 縦位置中央揃え */
+    justify-content: flex-start;
+    gap: 8px;
+    position: relative;      /* ボタン配置用 */
+}
+
+.member-position {
+    margin-right: 8px;
+    padding: 2px 6px;
+    background: #eee;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: #333;
+}
+
+/* 子供折りたたみを小さく横に */
+.children-details {
+    display: inline-block;
+    margin-left: 8px;
+    background: #222;
+    border-radius: 6px;
+    padding: 2px 6px;
+}
+
+.children-details summary {
+    cursor: pointer;
+    font-weight: bold;
+    padding: 0;
+    list-style: none;
+}
+
+.children-list {
+    list-style: none;
+    padding-left: 12px;
+    margin: 4px 0 0 0;
+}
+
+.children-list li {
+    padding: 4px 0;
+    border-bottom: 1px solid #444;
+}
+
+.children-list li:last-child {
+    border-bottom: none;
+}
+
+.children-details summary::-webkit-details-marker {
+    display: none;
+}
+
+.children-details summary::before {
+    content: "▶";
+    display: inline-block;
+    margin-right: 4px;
+    transition: transform 0.3s;
+}
+
+.children-details[open] summary::before {
+    transform: rotate(90deg);
+}
+
+/* 承認 or 削除ボタン */
+.member-item .member-action {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* アクティブ（赤） */
+.member-item:not(.is-hold) .member-action {
+    background: #d9534f;
+}
+
+/* 承認待ち（青） ※下に書くことで勝つ */
+.member-item.is-hold .member-action {
+    background: #0275d8;
+}
+
+.badge-hold {
+    display: inline-block;
+    background: #d9534f;
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-right: 8px;
+}
+
+/* ---------------------------------------- */
+    /* カレンダー */
+/* ---------------------------------------- */
+
+/* スケルトン */
+.skeleton-box {
+    background: #ddd;
+    border-radius: 6px;
+    animation: pulse 1.4s infinite ease-in-out;
+}
+
+.skeleton-text {
+    display: inline-block;
+    background: #ececec;
+    border-radius: 4px;
+    color: transparent;
+    animation: pulse 1.4s infinite ease-in-out;
+}
+
+@keyframes pulse {
+    0% { opacity: .6; }
+    50% { opacity: 1; }
+    100% { opacity: .6; }
+}
+
+/* 全体のレイアウト（現状維持） */
+.calendar-form {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#calendarArea {
+    flex: 6;
+    min-height: 0;
+    overflow-y: auto; /* ← 中に収めてスクロール */
+}
+
+#eventArea {
+    flex: 4;
+    min-height: 0;
+    overflow-y: auto; /* ← 中に収めてスクロール */
+}
+
+/* カレンダーヘッダー（月切り替え） */
+.cal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.3rem 0.4rem; /* ← 少し縮める */
+    background: #111;
+    border-radius: 6px;
+    margin-bottom: 0.4rem;
+    color: #fff;
+}
+
+/* 曜日 */
+.cal-weekday {
+    padding: 4px; /* ← 縦幅を縮める */
+    color: #ccc;
+    font-weight: bold;
+    font-size: 0.85rem; /* ← 少し小さく */
+    text-align: center;
+}
+
+/* カレンダー網目 */
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px; /* ← 余白縮める */
+}
+
+/* 日付セル */
+.day {
+    text-align: right;
+    padding: 5px;
+    height: 45px;
+    background: #1a1a1a;
+    color: #fff;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(255,255,255,0.1);
+    cursor: pointer;
+    position: relative;
+}
+
+.day:hover {
+    background: #2d3e55;
+}
+
+.day.selected {
+    background: #245a9f;
+}
+.day {
+    position: relative;
+    text-align: center;       /* 日付も中央寄せ */
+}
+
+.day .dots {
+    display: flex;
+    justify-content: center;  /* 真ん中に並べる */
+    gap: 4px;                 /* ドット同士の間隔 */
+    position: absolute;
+    bottom: 8px;              /* 下から少し上げる */
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.event-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.event-dot.festival { background: red; }
+.event-dot.regular  { background: blue; }
+.event-dot.practice { background: white; }
+
+/* イベントカード */
+.event-card {
+    background: #111;
+    margin: 4px 0; /* ← 余白縮める */
+    padding: 8px; /* ← パディング縮める */
+    border-radius: 6px;
+    color: #fff;
+    box-shadow: 0 1px 2px rgba(255,255,255,0.15);
+    font-size: 0.8rem; /* ← テキスト少し圧縮 */
+}
+
