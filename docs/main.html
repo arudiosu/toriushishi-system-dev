@@ -5,7 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css">
-
+<style>
+.practice-mode-toggle { margin: 8px 0; }
+.weekday-select { margin-top: 8px; }
+.weekday-checkboxes { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.weekday-checkboxes label { display: flex; align-items: center; gap: 3px; font-size: 14px; }
+</style>
 </head>
 
 <body>
@@ -276,12 +281,42 @@
 
         <div class="event-create-card-title">
             <label for="practiceTitle">タイトル</label>
-            <input type="text" id="practiceTitle" placeholder="例：通常練習" />
+            <input type="text" id="practiceTitle" placeholder="練習" />
+        </div>
+
+        <div class="practice-mode-toggle">
+            <label>
+                <input type="checkbox" id="practiceRangeMode"> 期間指定（複数日まとめて登録）
+            </label>
+        </div>
+
+        <!-- 単日入力 -->
+        <div id="practiceSingleDate" class="event-create-card-time">
+            <label for="practiceDate">日付</label>
+            <input type="date" id="practiceDate" />
+        </div>
+
+        <!-- 期間指定入力 -->
+        <div id="practiceRangeDates" class="event-create-card-time" style="display:none;">
+            <label for="practiceStartDate">開始日</label>
+            <input type="date" id="practiceStartDate" />
+            <label for="practiceEndDate">終了日</label>
+            <input type="date" id="practiceEndDate" />
+            <div class="weekday-select">
+                <label>曜日を選択</label>
+                <div class="weekday-checkboxes">
+                    <label><input type="checkbox" name="practiceWeekday" value="0"> 日</label>
+                    <label><input type="checkbox" name="practiceWeekday" value="1"> 月</label>
+                    <label><input type="checkbox" name="practiceWeekday" value="2"> 火</label>
+                    <label><input type="checkbox" name="practiceWeekday" value="3"> 水</label>
+                    <label><input type="checkbox" name="practiceWeekday" value="4"> 木</label>
+                    <label><input type="checkbox" name="practiceWeekday" value="5"> 金</label>
+                    <label><input type="checkbox" name="practiceWeekday" value="6"> 土</label>
+                </div>
+            </div>
         </div>
 
         <div class="event-create-card-time">
-            <label for="practiceDate">日付</label>
-            <input type="date" id="practiceDate" />
             <label for="practiceStart">開始時間</label>
             <input type="time" id="practiceStart" />
             <label for="practiceEnd">終了時間</label>

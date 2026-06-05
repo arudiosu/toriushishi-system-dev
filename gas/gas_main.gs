@@ -747,7 +747,7 @@ function savePracticeGAS(practice) {
 
     rowArr[P["practiceId"] - 1] = newId;
     rowArr[P["date"] - 1]       = dateOnly;
-    rowArr[P["title"] - 1]      = practice.title || "練習日";
+    rowArr[P["title"] - 1]      = practice.title || "練習";
 
     if (P["start"]) {
       rowArr[P["start"] - 1] = startTime;

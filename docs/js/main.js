@@ -295,7 +295,7 @@ function createPracticeCard(pr) {
 
     card.innerHTML = `
         <div class="practice-date">${pr.date}</div>
-        <div class="practice-title">${pr.title || "練習日"}</div>
+        <div class="practice-title">${pr.title || "練習"}</div>
         <div class="answer">${pr.myStatus || ""}</div>
         <div class="responses-list">
             欠席:${pr.absent.length} 遅れる:${pr.late.length}
@@ -381,7 +381,6 @@ function initEventDelegation() {
             if (practiceCard) {
                 const practiceId = Number(practiceCard.dataset.practiceId);
 
-                // ▼▼▼ ここから追加：過去の練習は回答不可 ▼▼▼
                 const dateText = practiceCard.querySelector(".practice-detail-card-date")?.textContent || "";
                 const practiceDate = new Date(dateText.replace(/\//g, "-")).setHours(0,0,0,0);
                 const today = new Date().setHours(0,0,0,0);
@@ -390,7 +389,6 @@ function initEventDelegation() {
                     alert("過去の練習には回答できません。");
                     return;
                 }
-                // ▲▲▲ ここまで追加 ▲▲▲
 
                 let answer = "";
                 if (responseBtn.classList.contains("absent")) answer = "欠席";
@@ -417,8 +415,7 @@ function initEventDelegation() {
         // 詳細閉じる（data-targetを利用したケース形式）
         const closeTarget = target.closest(".close-card-btn");
         if (closeTarget) {
-            // data-targetで閉じる対象を取得
-            const targetType = closeTarget.dataset.target; // "event", "member" など
+            const targetType = closeTarget.dataset.target;
             switch (targetType) {
                 case "event":
                     document.getElementById("eventDetailCard")?.classList.remove("active");
@@ -439,7 +436,6 @@ function initEventDelegation() {
                     document.getElementById("practiceCreateCard")?.classList.remove("active");
                     break;
                 default:
-                    // data-target が無い場合や想定外
                     break;
             }
             return;
@@ -558,14 +554,12 @@ function buildMemberItemUser(member) {
     const li = document.createElement("li");
     li.classList.add("member-item");
 
-    // --- ここから追加（役職） ---
     if (member.position) {
         const posSpan = document.createElement("span");
         posSpan.classList.add("member-position");
         posSpan.textContent = member.position;
         li.appendChild(posSpan);
     }
-    // --- ここまで追加 ---
 
     const nameSpan = document.createElement("span");
     nameSpan.classList.add("member-name");
@@ -582,16 +576,13 @@ function buildMemberItemAdmin(member, isHold) {
     li.classList.add("member-item");
     if (isHold) li.classList.add("is-hold");
 
-    // --- ここから追加（役職） ---
     if (member.position) {
         const posSpan = document.createElement("span");
         posSpan.classList.add("member-position");
         posSpan.textContent = member.position;
         li.appendChild(posSpan);
     }
-    // --- ここまで追加 ---
 
-    // 名前
     const nameSpan = document.createElement("span");
     nameSpan.classList.add("member-name");
     nameSpan.textContent = member.name;
@@ -599,7 +590,6 @@ function buildMemberItemAdmin(member, isHold) {
 
     appendChildren(li, member);
 
-    // 管理ボタン
     const btn = document.createElement("button");
     btn.classList.add("member-action");
 
@@ -685,27 +675,23 @@ async function deleteMember(userId) {
 // 新規入力　初期化  編集
 // ============================
 function initEventCreateCard() {
-    // タイトル・日付・時間を空に
     document.getElementById("eventTitle").value = "";
     document.getElementById("eventDate").value = "";
     document.getElementById("eventTime").value = "";
     document.getElementById("eventLocation").value = "";
     document.getElementById("eventComment").value = "";
 
-    // 演目リストを空に
     const performanceList = document.getElementById("performanceList");
     if (performanceList) performanceList.innerHTML = "";
 
-    // 折りたたみリストを空に
     document.querySelectorAll(".response-list").forEach(ul => ul.innerHTML = "");
 
-    // loading-overlay を非表示
     const overlay = document.querySelector(".event-create-card .loading-overlay");
     if (overlay) overlay.style.display = "none";
 }
 
 function openCreateForm() {
-    initEventCreateCard();  // ← 全て空にする
+    initEventCreateCard();
 
     const createCard = document.querySelector(".event-create-card");
     createCard.classList.add("active");
@@ -713,26 +699,21 @@ function openCreateForm() {
 
 
 function openEditForm(eventData) {
-    // 初期化
     initEventCreateCard();
 
-    // 編集IDをセット（←追加）
     const editCard = document.querySelector(".event-create-card");
     editCard.dataset.eventId = eventData.eventId;
 
-    // ラジオ
     document.querySelectorAll('input[name="eventType"]').forEach(radio => {
         radio.checked = (radio.value === eventData.type);
     });
 
-    // テキスト
     document.getElementById("eventTitle").value = eventData.title || "";
     document.getElementById("eventDate").value = (eventData.date || "").replace(/\//g, "-");
     document.getElementById("eventTime").value = eventData.time || "";
     document.getElementById("eventLocation").value = eventData.location || "";
     document.getElementById("eventComment").value = eventData.comment || "";
 
-    // 既存演目を読み込む
     const performanceList = document.getElementById("performanceList");
     if (performanceList && Array.isArray(eventData.performances)) {
         eventData.performances.forEach(perf => {
@@ -760,7 +741,6 @@ function openEditForm(eventData) {
         });
     }
 
-    // 編集カードを表示
     editCard.classList.add("active");
 }
 
@@ -779,14 +759,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const wrapper = document.createElement("div");
         wrapper.classList.add("performance-item");
 
-        // 演目名
         const nameInput = document.createElement("input");
         nameInput.type = "text";
         nameInput.placeholder = "演目名";
         nameInput.classList.add("performance-name");
         wrapper.appendChild(nameInput);
 
-        // 固定担当欄
         ["太鼓", "小太鼓", "獅子舞"].forEach(roleName => {
             const roleInput = document.createElement("input");
             roleInput.type = "text";
@@ -798,8 +776,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         performanceList.appendChild(wrapper);
     });
-
-    // 保存ボタン
 
     saveBtn.addEventListener("click", async () => {
         if (!confirm("保存しますか？")) return;
@@ -815,11 +791,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!date) return alert("日付を選択してください");
         if (!time) return alert("時間を選択してください");
 
-        // ★ 編集 or 新規判定
         const createCard = document.querySelector(".event-create-card");
         const eventId = createCard.dataset.eventId ? Number(createCard.dataset.eventId) : null;
 
-        // 演目データを収集
         const performances = [];
         document.querySelectorAll("#performanceList .performance-item").forEach(item => {
             const name = item.querySelector(".performance-name")?.value.trim();
@@ -831,9 +805,8 @@ document.addEventListener("DOMContentLoaded", () => {
             performances.push({ name, roles });
         });
 
-        // ★ eventId を含めて GAS に送る
         const eventData = {
-            eventId,   // ← 編集ならIDあり / 新規なら null
+            eventId,
             type,
             title,
             date,
@@ -846,7 +819,6 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             loadingOverlay.style.display = "flex";
 
-            // GAS 側で new / update を切り替えられる
             const res = await callGasApi({
                 action: "saveEvent",
                 event: eventData
@@ -874,10 +846,21 @@ document.addEventListener("DOMContentLoaded", () => {
 function initPracticeCreateCard() {
     document.getElementById("practiceTitle").value = "";
     document.getElementById("practiceDate").value = "";
+    document.getElementById("practiceStartDate").value = "";
+    document.getElementById("practiceEndDate").value = "";
     document.getElementById("practiceStart").value = "";
     document.getElementById("practiceEnd").value = "";
     document.getElementById("practiceLocation").value = "";
     document.getElementById("practiceComment").value = "";
+
+    // 期間指定モードをリセット
+    const rangeMode = document.getElementById("practiceRangeMode");
+    if (rangeMode) rangeMode.checked = false;
+    document.getElementById("practiceSingleDate").style.display = "";
+    document.getElementById("practiceRangeDates").style.display = "none";
+
+    // 曜日チェックボックスをリセット
+    document.querySelectorAll('input[name="practiceWeekday"]').forEach(cb => cb.checked = false);
 }
 
 function openPracticeCreateForm() {
@@ -886,35 +869,77 @@ function openPracticeCreateForm() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    // 期間指定トグル
+    const rangeModeCheck = document.getElementById("practiceRangeMode");
+    if (rangeModeCheck) {
+        rangeModeCheck.addEventListener("change", () => {
+            document.getElementById("practiceSingleDate").style.display =
+                rangeModeCheck.checked ? "none" : "";
+            document.getElementById("practiceRangeDates").style.display =
+                rangeModeCheck.checked ? "" : "none";
+        });
+    }
+
     const savePracticeBtn = document.querySelector(".save-practice-btn");
     if (!savePracticeBtn) return;
 
     savePracticeBtn.addEventListener("click", async () => {
-        if (!confirm("練習日を保存しますか？")) return;
-
         const title    = document.getElementById("practiceTitle").value.trim();
-        const date     = document.getElementById("practiceDate").value;
         const start    = document.getElementById("practiceStart").value;
         const end      = document.getElementById("practiceEnd").value;
         const location = document.getElementById("practiceLocation").value.trim();
         const comment  = document.getElementById("practiceComment").value.trim();
+        const isRange  = document.getElementById("practiceRangeMode").checked;
 
-        if (!date)  return alert("日付を選択してください");
+        let datesToSave = [];
+
+        if (isRange) {
+            const startDate = document.getElementById("practiceStartDate").value;
+            const endDate   = document.getElementById("practiceEndDate").value;
+            const selectedWeekdays = [...document.querySelectorAll('input[name="practiceWeekday"]:checked')]
+                .map(cb => Number(cb.value));
+
+            if (!startDate) return alert("開始日を選択してください");
+            if (!endDate)   return alert("終了日を選択してください");
+            if (startDate > endDate) return alert("開始日は終了日より前にしてください");
+            if (selectedWeekdays.length === 0) return alert("曜日を選択してください");
+
+            const cur  = new Date(startDate + "T00:00:00");
+            const last = new Date(endDate   + "T00:00:00");
+            while (cur <= last) {
+                if (selectedWeekdays.includes(cur.getDay())) {
+                    const y = cur.getFullYear();
+                    const m = String(cur.getMonth() + 1).padStart(2, "0");
+                    const d = String(cur.getDate()).padStart(2, "0");
+                    datesToSave.push(`${y}-${m}-${d}`);
+                }
+                cur.setDate(cur.getDate() + 1);
+            }
+
+            if (datesToSave.length === 0) return alert("指定の期間・曜日に該当する日がありません");
+            if (!confirm(`${datesToSave.length}件の練習日を登録します。よろしいですか？`)) return;
+
+        } else {
+            const date = document.getElementById("practiceDate").value;
+            if (!date) return alert("日付を選択してください");
+            datesToSave = [date];
+            if (!confirm("練習日を保存しますか？")) return;
+        }
+
         if (!start) return alert("開始時間を選択してください");
-
-        const practiceData = { title: title || "練習日", date, start, end, location, comment };
 
         try {
             loadingOverlay.style.display = "flex";
 
-            const res = await callGasApi({ action: "savePractice", practice: practiceData });
-
-            if (!res.success) throw new Error(res.message || "練習日保存失敗");
+            for (const date of datesToSave) {
+                const practiceData = { title: title || "練習", date, start, end, location, comment };
+                const res = await callGasApi({ action: "savePractice", practice: practiceData });
+                if (!res.success) throw new Error(res.message || "練習日保存失敗");
+            }
 
             alert("保存しました");
             document.getElementById("practiceCreateCard").classList.remove("active");
 
-            // 練習データを再取得して画面を更新
             await getPractices();
             loadHomeEvents();
             initCalendar();
@@ -960,20 +985,17 @@ async function updatePracticeResponse(practiceId, answer, card, userId) {
             answer
         });
 
-        // ▼ ボタン選択状態
         card.querySelector(".response-btn.absent")?.classList
             .toggle("selected", answer === "欠席");
         card.querySelector(".response-btn.late")?.classList
             .toggle("selected", answer === "遅刻");
 
-        // ▼▼ ここが重要。必ず「card の中を検索」する ▼▼
         const absentListElem = card.querySelector("ul.response-list.absent");
         const lateListElem   = card.querySelector("ul.response-list.late");
 
         fillResponseList(absentListElem, result.absent);
         fillResponseList(lateListElem, result.late);
 
-        // ▼ 見出し更新（必ず card の中だけ）
         card.querySelector(".toggle-response-btn.absent").textContent =
             `欠席 ${result.absent.length}人`;
 
@@ -994,35 +1016,24 @@ async function fillDetailCard(eventData, userId, card) {
     editBtn.style.display = (userRole === "admin") ? "block" : "none";
 
     try {
-        // ==========
-        // 基本情報
-        // ==========
         card.querySelector(".event-detail-card-title").textContent = eventData.title || "";
         card.querySelector(".event-detail-card-date").textContent = eventData.date || "";
         card.querySelector(".event-detail-card-time-text").textContent = eventData.time || "";
         card.querySelector(".event-detail-card-location").textContent = eventData.location || "場所未設定";
         card.querySelector(".event-detail-card-comment").textContent = eventData.comment || "";
 
-        // ==========
-        // 回答状況（GAS 呼ばず eventData から取る）
-        // ==========
         const myStatus = eventData.myStatus || "未回答";
         card.querySelector(".response-btn.yes").classList.toggle("selected", myStatus === "参加");
         card.querySelector(".response-btn.no").classList.toggle("selected", myStatus === "不参加");
 
-        // メンバー一覧
         fillResponseList(card.querySelector("ul.response-list.yes"), eventData.members.yes);
         fillResponseList(card.querySelector("ul.response-list.no"), eventData.members.no);
         fillResponseList(card.querySelector("ul.response-list.na"), eventData.members.na);
 
-        // ボタンの人数表記
         card.querySelector(".toggle-response-btn.yes").textContent = `参加者 ${eventData.members.yes.length}人`;
         card.querySelector(".toggle-response-btn.no").textContent  = `不参加者 ${eventData.members.no.length}人`;
         card.querySelector(".toggle-response-btn.na").textContent  = `未回答者 ${eventData.members.na.length}人`;
 
-        // ==========
-        // 演目（既存処理のまま必要なら eventData に追加）
-        // ==========
         const perfList = card.querySelector(".performance-list");
         perfList.innerHTML = "";
 
@@ -1050,7 +1061,6 @@ async function fillDetailCard(eventData, userId, card) {
             });
         }
 
-        // 初期状態では非表示
         card.querySelectorAll(".response-list").forEach(ul => ul.style.display = "none");
 
     } catch (e) {
@@ -1067,14 +1077,12 @@ function fillResponseList(ulElement, names) {
 
 async function fillPracticeDetailCard(practiceData, userId, card) {
 
-    // タイトル
-    card.querySelector(".practice-detail-card-title").textContent = practiceData.title || "練習日";
+    card.querySelector(".practice-detail-card-title").textContent = practiceData.title || "練習";
     card.querySelector(".practice-detail-card-date").textContent = practiceData.date;
     card.querySelector(".practice-detail-card-time-text").textContent = (practiceData.start || "") + (practiceData.end ? " 〜 " + practiceData.end : "");
-    card.querySelector(".practice-detail-card-location").textContent =　practiceData.location || "";
-    card.querySelector(".practice-detail-card-comment").textContent = practiceData.myComment || "";
+    card.querySelector(".practice-detail-card-location").textContent = practiceData.location || "";
+    card.querySelector(".practice-detail-card-comment").textContent = practiceData.comment || "";
 
-    // 休む人 / 遅れる人のリストをクリア
     const absentList = card.querySelector(".response-list.absent");
     const lateList   = card.querySelector(".response-list.late");
 
@@ -1083,7 +1091,6 @@ async function fillPracticeDetailCard(practiceData, userId, card) {
 
     card.querySelectorAll(".response-list").forEach(ul => ul.style.display = "none");
 
-    // メンバー一覧
     (practiceData.absent || []).forEach(name => {
         const li = document.createElement("li");
         li.textContent = name;
@@ -1096,13 +1103,11 @@ async function fillPracticeDetailCard(practiceData, userId, card) {
         lateList.appendChild(li);
     });
 
-    // トグルボタンに人数を反映
     const absentToggle = card.querySelector(".toggle-response-btn.absent");
     const lateToggle   = card.querySelector(".toggle-response-btn.late");
     if (absentToggle) absentToggle.textContent = `欠席 ${(practiceData.absent || []).length}人`;
     if (lateToggle)   lateToggle.textContent   = `遅れて参加 ${(practiceData.late || []).length}人`;
 
-    // 自分の回答状態をボタンに反映
     const myStatus = practiceData.myStatus || "";
     card.querySelector(".response-btn.absent")?.classList.toggle("selected", myStatus === "欠席");
     card.querySelector(".response-btn.late")?.classList.toggle("selected", myStatus === "遅刻");
@@ -1134,7 +1139,6 @@ function initChatBot() {
         const data = await callGasApi({ action: "chatAI", text: text });
         typingWrapper.remove();
 
-        // エラー（success:false）
         if (!data.success) {
             appendChatMessage(
                 data.message || "AIサービスでエラーが発生しました。",
@@ -1143,7 +1147,6 @@ function initChatBot() {
             return;
         }
 
-        // 成功
         appendChatMessage(data.reply, "ai");
 
     } catch (e) {
@@ -1266,26 +1269,20 @@ function generateCalendar(year, month) {
     html += `</div>`;
     cal.innerHTML = html;
 
-    // ▼ 日をクリックしたときの処理を関数化
     function selectDay(dayElem) {
-        // 既存の selected を全部外す
         cal.querySelectorAll(".day.selected")
             .forEach(el => el.classList.remove("selected"));
 
-        // 選択
         dayElem.classList.add("selected");
 
-        // ロード
         const date = dayElem.dataset.date;
         loadEventByDate(date);
     }
 
-    // ▼ 日クリックイベント
     cal.querySelectorAll(".day").forEach(day => {
         day.addEventListener("click", () => selectDay(day));
     });
 
-    // ▼ 今日の月ならロード時に自動選択する
     const now = new Date();
     if (now.getFullYear() === year && now.getMonth() === month) {
 
@@ -1294,11 +1291,10 @@ function generateCalendar(year, month) {
 
         const todayCell = cal.querySelector(`.day[data-date="${todayStr}"]`);
         if (todayCell) {
-            selectDay(todayCell); // ← ← ← クリック処理をそのまま実行！
+            selectDay(todayCell);
         }
     }
 
-    // ▼ prev / next はそのまま
     cal.querySelector(".prev").addEventListener("click", () => {
         const prev = new Date(year, month - 1);
         generateCalendar(prev.getFullYear(), prev.getMonth());
@@ -1320,12 +1316,10 @@ function renderEventsOfDate(dateStr) {
 
     const normalize = s => s.replace(/-/g, "/").split(" ")[0];
 
-    // イベント
     const eventsToday = Object.values(eventMap).filter(
         ev => normalize(ev.date) === normalize(dateStr)
     );
 
-    // 練習
     const practiceToday = Object.values(practiceMap).filter(
         pr => normalize(pr.date) === normalize(dateStr)
     );
@@ -1337,13 +1331,11 @@ function renderEventsOfDate(dateStr) {
 
     const fragment = document.createDocumentFragment();
 
-    // イベントカード
     eventsToday.forEach(ev => {
         const card = createEventCard(ev, { includeDeadline: true });
         fragment.appendChild(card);
     });
 
-    // 練習日カード
     practiceToday.forEach(pr => {
         const card = createPracticeCard(pr);
         fragment.appendChild(card);
