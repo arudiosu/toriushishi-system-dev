@@ -1,6 +1,6 @@
 
-// ★ ここにあなたのデプロイURLを入れる
-window.GAS_URL = "https://script.google.com/macros/s/AKfycbyzeUMTM_AK_8v00OUNz_BivDg-tL8GBhQclvMkUjLO5v60Xy4MlfyNjBev1xMT4gEj/exec";
+// ★ テスト環境用GAS URL
+window.GAS_URL = "https://script.google.com/macros/s/AKfycbzxirixMouit12f5rfZmbBn59N4tUuZYmX4ZSw7diJOAr0-Hem9uMXCv6MUuzIWb7eA/exec";
 
 /* =======================================================
 共通 API 呼び出し関数 (CORS回避 & 共通化)
@@ -100,4 +100,3 @@ async function checkAdminAccess() {
         return false;
     }
 }
-
