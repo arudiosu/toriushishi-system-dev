@@ -759,10 +759,12 @@ function savePracticeGAS(practice) {
       rowArr[P["end"] - 1] = endTime;
     }
 
-    if (P["location"])  rowArr[P["location"] - 1]  = practice.location || "";
-    if (P["comment"])   rowArr[P["comment"] - 1]   = practice.comment  || "";
-    if (P["createdAt"]) rowArr[P["createdAt"] - 1] = now;
-    if (P["updatedAt"]) rowArr[P["updatedAt"] - 1] = now;
+    if (P["location"])   rowArr[P["location"] - 1]   = practice.location || "";
+    if (P["comment"])    rowArr[P["comment"] - 1]    = practice.comment  || "";
+    if (P["created_at"]) rowArr[P["created_at"] - 1] = now;
+    if (P["updated_at"]) rowArr[P["updated_at"] - 1] = now;
+    if (P["createdAt"])  rowArr[P["createdAt"] - 1]  = now;
+    if (P["updatedAt"])  rowArr[P["updatedAt"] - 1]  = now;
 
     sheet.appendRow(rowArr);
 
