@@ -109,6 +109,39 @@ function doPost(e) {
         result = getPerformanceRoles();
         break;
 
+      // ===== お旅管理 =====
+      case "getOtabiPlaces":
+        result = getOtabiPlacesGAS();
+        break;
+
+      case "saveOtabiPlace":
+        result = saveOtabiPlaceGAS(data.place);
+        break;
+
+      case "deleteOtabiPlace":
+        result = deleteOtabiPlaceGAS(data.placeId);
+        break;
+
+      case "getOtabiSchedule":
+        result = getOtabiScheduleGAS(data.year, data.group);
+        break;
+
+      case "saveOtabiEntry":
+        result = saveOtabiEntryGAS(data.entry);
+        break;
+
+      case "deleteOtabiEntry":
+        result = deleteOtabiEntryGAS(data.entryId);
+        break;
+
+      case "copyOtabiSchedule":
+        result = copyOtabiScheduleGAS(data.fromYear, data.toYear, data.group);
+        break;
+
+      case "getOtabiDonations":
+        result = getOtabiDonationsGAS(data.year);
+        break;
+
       default:
         result = { success: false, msg: "unknown action" };
     }
@@ -140,30 +173,21 @@ function saveSession(user) {
     createdAt: Date.now()
   });
 
-  // セッション期限：6時間
   cache.put(sessionId, sessionData, 6 * 60 * 60);
 
   return sessionId;
 }
 
-/**
- * セッション確認＋権限チェック
- * @param {string} sessionId - フロントから送られてきたセッションID
- * @param {string} requiredRole - 必要な権限 ("user" or "admin")
- * @returns {Object} { valid: true/false, userId: number, role: string, msg: string }
- */
 function validateSessionAPI(sessionId, requiredRole) {
   const cache = CacheService.getScriptCache();
   const sessionData = cache.get(sessionId);
 
   if (!sessionData) {
-    // セッションなし or 期限切れ
     return { valid: false, msg: "セッションが無効です" };
   }
 
   const session = JSON.parse(sessionData);
 
-  // role チェック
   if (requiredRole && session.role !== requiredRole) {
     return { valid: false, msg: "権限がありません" };
   }
@@ -176,21 +200,15 @@ function validateSessionAPI(sessionId, requiredRole) {
   };
 }
 
-
-
-// ハッシュ値
 function hashPassword(password) {
   const raw = Utilities.computeDigest(
     Utilities.DigestAlgorithm.SHA_256,
     password,
     Utilities.Charset.UTF_8
   );
-
-  // バイナリ → 16進文字列に変換
   return raw.map(b => ('0' + (b & 0xff).toString(16)).slice(-2)).join('');
 }
 
-// シートのヘッダー名を自動で取得する関数
 function getHeaderMap(sheet) {
   const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
   const map = {};
