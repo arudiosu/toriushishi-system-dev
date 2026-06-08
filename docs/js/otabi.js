@@ -111,8 +111,11 @@ async function loadOtabiSchedule() {
     document.querySelectorAll(".otabi-group-btn").forEach(b => b.classList.toggle("active", b.dataset.group === otabiGroup));
     const list = document.getElementById("otabiScheduleList");
     list.innerHTML = [1,2,3].map(() => '<div class="skeleton skeleton-card"></div>').join('');
-    const res = await callGasApi({ action: "getOtabiSchedule", year: otabiYear, group: otabiGroup });
-    otabiScheduleEntries = res.entries || [];
+    const fetches = [callGasApi({ action: "getOtabiSchedule", year: otabiYear, group: otabiGroup })];
+    if (!otabiPlaces.length) fetches.push(callGasApi({ action: "getOtabiPlaces" }));
+    const [schedRes, placesRes] = await Promise.all(fetches);
+    otabiScheduleEntries = schedRes.entries || [];
+    if (placesRes) otabiPlaces = placesRes.places || [];
     renderOtabiSchedule();
 }
 
@@ -122,7 +125,12 @@ function renderOtabiSchedule() {
         list.innerHTML = '<p class="no-event">スケジュールが登録されていません</p>';
         return;
     }
-    list.innerHTML = otabiScheduleEntries.map(e => `
+    list.innerHTML = otabiScheduleEntries.map(e => {
+        const place = otabiPlaces.find(p => p.place_id == e.place_id);
+        const mapBtn = place?.address
+            ? `<a class="otabi-map-icon" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.address)}" target="_blank" rel="noopener" title="地図を見る"><i class="fas fa-map-marker-alt"></i></a>`
+            : '';
+        return `
         <div class="otabi-item otabi-entry-item" data-entry-id="${e.entry_id}">
             <div class="otabi-entry-no">${e.no || '-'}</div>
             <div class="otabi-entry-time">${e.time || '--:--'}</div>
@@ -130,12 +138,14 @@ function renderOtabiSchedule() {
                 <div class="otabi-item-title">${e.place_name || '未設定'}</div>
                 ${e.memo ? `<div class="otabi-item-sub">${e.memo}</div>` : ''}
             </div>
+            ${mapBtn}
             ${e.donation ? `<div class="otabi-donation-badge">￥${Number(e.donation).toLocaleString()}</div>` : ''}
-        </div>
-    `).join('');
+        </div>`;
+    }).join('');
     list.querySelectorAll(".otabi-entry-item").forEach(item => {
-        item.addEventListener("click", () => {
-            openEntryForm(otabiScheduleEntries.find(e => e.entry_id == item.dataset.entryId));
+        item.addEventListener("click", e => {
+            if (e.target.closest(".otabi-map-icon")) return;
+            openEntryForm(otabiScheduleEntries.find(en => en.entry_id == item.dataset.entryId));
         });
     });
 }
