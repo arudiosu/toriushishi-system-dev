@@ -11,6 +11,141 @@
 .weekday-select { margin-top: 8px; }
 .weekday-checkboxes { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
 .weekday-checkboxes label { display: flex; align-items: center; gap: 3px; font-size: 14px; }
+
+/* ===== 演目フォーム ===== */
+.perf-item {
+    background: var(--surface-2);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.perf-item-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.perf-item-header-left { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; flex: 1; }
+.perf-no-input { width: 56px; }
+.perf-tilde { color: var(--text-3); font-size: .85rem; flex-shrink: 0; }
+.perf-remove-btn {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--surface-3);
+    border: none;
+    color: var(--text-3);
+    cursor: pointer;
+    flex-shrink: 0;
+    font-size: .85rem;
+}
+.perf-drums { display: flex; gap: 8px; }
+.perf-drums input { flex: 1; }
+.perf-roles-list { display: flex; flex-direction: column; gap: 0; }
+.perf-role-row {
+    background: var(--surface-3);
+    border-radius: var(--radius-sm);
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+.perf-role-row-top { display: flex; gap: 6px; align-items: center; }
+.perf-role-row-top .role-label-input { flex: 1; }
+.role-remove-btn {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-3);
+    cursor: pointer;
+    flex-shrink: 0;
+    font-size: .8rem;
+}
+.perf-add-role-btn {
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-3);
+    padding: 6px;
+    font-size: .8rem;
+    cursor: pointer;
+    width: 100%;
+    text-align: center;
+}
+.perf-item input[type="text"],
+.perf-item input[type="number"],
+.perf-item input[type="time"],
+.perf-item textarea {
+    padding: 8px 10px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-1);
+    font-size: .88rem;
+    width: 100%;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+}
+.perf-role-row input[type="text"] { background: var(--surface-2); }
+.perf-role-row textarea { background: var(--surface-2); }
+.perf-item textarea { resize: vertical; font-family: inherit; min-height: 48px; }
+/* ===== 演目詳細表示 ===== */
+.performance-list { padding: 4px 0; }
+.perf-detail-item {
+    background: var(--surface-2);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    margin-bottom: 8px;
+}
+.perf-detail-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+}
+.perf-no-badge {
+    width: 24px; height: 24px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .75rem;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+.perf-detail-time { font-size: .8rem; color: var(--accent-teal); font-weight: 600; }
+.perf-detail-name { font-weight: 700; font-size: .95rem; }
+.perf-detail-drums {
+    font-size: .8rem;
+    color: var(--text-2);
+    margin-bottom: 6px;
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+.perf-detail-role {
+    display: flex;
+    gap: 8px;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: baseline;
+}
+.perf-detail-role:last-child { border-bottom: none; }
+.perf-role-label-text {
+    font-size: .75rem;
+    font-weight: 700;
+    color: var(--text-3);
+    white-space: nowrap;
+    min-width: 46px;
+}
+.perf-role-members-text {
+    font-size: .88rem;
+    color: var(--text-1);
+    white-space: pre-wrap;
+    word-break: break-all;
+}
 </style>
 </head>
 
@@ -162,7 +297,7 @@
                 <ul class="response-list na"></ul>
             </div>
             <button class="toggle-performances-btn">演目一覧</button>
-            <ul class="performance-list"></ul>
+            <div class="performance-list"></div>
         </div>
     </div>
 
