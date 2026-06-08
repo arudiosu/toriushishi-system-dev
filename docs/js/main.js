@@ -36,9 +36,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const ok = await checkSessionAndGetUserId();
     if (!ok) return;
 
-    // ★ 先にイベント取得
-    await getEvents();
-    await getPractices();
+    // ★ イベント・練習を並列取得
+    await Promise.all([getEvents(), getPractices()]);
 
     // ★ 取得したデータで描画
     loadHomeEvents();   
@@ -245,7 +244,7 @@ function renderScheduleHome(events, practices = []) {
 
     practices.forEach(pr => {
         const d = new Date(pr.date); d.setHours(0,0,0,0);
-        if (d >= today) items.push({ type: "practice", date: d, data: pr });
+        if (d.getTime() === today.getTime()) items.push({ type: "practice", date: d, data: pr });
     });
 
     items.sort((a, b) => a.date - b.date);
@@ -438,6 +437,21 @@ function initEventDelegation() {
                 case "practice-create":
                     document.getElementById("practiceCreateCard")?.classList.remove("active");
                     break;
+                case "edit-event":
+                    document.getElementById("eventCreateCard")?.classList.remove("active");
+                    break;
+                case "otabi":
+                    document.getElementById("otabiCard")?.classList.remove("active");
+                    break;
+                case "otabi-place-form":
+                    document.getElementById("otabiPlaceFormCard")?.classList.remove("active");
+                    break;
+                case "otabi-entry-form":
+                    document.getElementById("otabiEntryFormCard")?.classList.remove("active");
+                    break;
+                case "otabi-bulk-entry":
+                    document.getElementById("otabiBulkEntryCard")?.classList.remove("active");
+                    break;
                 default:
                     // data-target が無い場合や想定外
                     break;
@@ -499,6 +513,16 @@ document.querySelectorAll(".tab-item").forEach(tab => {
                 return;
             }
             openPracticeCreateForm();
+            return;
+        }
+
+        // お旅管理カード
+        if (targetTab === "otabi-management") {
+            if (userRole === "user") {
+                alert("管理者のみアクセスできます。");
+                return;
+            }
+            openOtabiCard();
             return;
         }
     });
@@ -736,27 +760,7 @@ function openEditForm(eventData) {
     const performanceList = document.getElementById("performanceList");
     if (performanceList && Array.isArray(eventData.performances)) {
         eventData.performances.forEach(perf => {
-            const wrapper = document.createElement("div");
-            wrapper.classList.add("performance-item");
-
-            const nameInput = document.createElement("input");
-            nameInput.type = "text";
-            nameInput.placeholder = "演目名";
-            nameInput.classList.add("performance-name");
-            nameInput.value = perf.name || "";
-            wrapper.appendChild(nameInput);
-
-            ["太鼓", "小太鼓", "獅子舞"].forEach(roleName => {
-                const roleInput = document.createElement("input");
-                roleInput.type = "text";
-                roleInput.placeholder = roleName;
-                roleInput.classList.add("performance-role");
-                roleInput.dataset.role = roleName;
-                roleInput.value = perf.roles?.[roleName] || "";
-                wrapper.appendChild(roleInput);
-            });
-
-            performanceList.appendChild(wrapper);
+            performanceList.appendChild(buildPerfItem(perf));
         });
     }
 
@@ -776,27 +780,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 演目追加
     addBtn.addEventListener("click", () => {
-        const wrapper = document.createElement("div");
-        wrapper.classList.add("performance-item");
-
-        // 演目名
-        const nameInput = document.createElement("input");
-        nameInput.type = "text";
-        nameInput.placeholder = "演目名";
-        nameInput.classList.add("performance-name");
-        wrapper.appendChild(nameInput);
-
-        // 固定担当欄
-        ["太鼓", "小太鼓", "獅子舞"].forEach(roleName => {
-            const roleInput = document.createElement("input");
-            roleInput.type = "text";
-            roleInput.placeholder = roleName;
-            roleInput.classList.add("performance-role");
-            roleInput.dataset.role = roleName;
-            wrapper.appendChild(roleInput);
-        });
-
-        performanceList.appendChild(wrapper);
+        performanceList.appendChild(buildPerfItem());
     });
 
     // 保存ボタン
@@ -820,16 +804,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const eventId = createCard.dataset.eventId ? Number(createCard.dataset.eventId) : null;
 
         // 演目データを収集
-        const performances = [];
-        document.querySelectorAll("#performanceList .performance-item").forEach(item => {
-            const name = item.querySelector(".performance-name")?.value.trim();
-            if (!name) return;
-            const roles = {};
-            item.querySelectorAll(".performance-role").forEach(input => {
-                if (input.value.trim()) roles[input.dataset.role] = input.value.trim();
-            });
-            performances.push({ name, roles });
-        });
+        const performances = collectPerformances();
 
         // ★ eventId を含めて GAS に送る
         const eventData = {
@@ -1023,32 +998,7 @@ async function fillDetailCard(eventData, userId, card) {
         // ==========
         // 演目（既存処理のまま必要なら eventData に追加）
         // ==========
-        const perfList = card.querySelector(".performance-list");
-        perfList.innerHTML = "";
-
-        if (Array.isArray(eventData.performances)) {
-            eventData.performances.forEach(perf => {
-                const li = document.createElement("li");
-                li.classList.add("performance-item");
-
-                const nameSpan = document.createElement("span");
-                nameSpan.classList.add("performance-name");
-                nameSpan.textContent = perf.name || "未設定";
-                li.appendChild(nameSpan);
-
-                if (perf.roles) {
-                    const rolesText = Object.entries(perf.roles)
-                        .map(([role, person]) => `${role}: ${person || "未設定"}`)
-                        .join(" / ");
-                    const rolesSpan = document.createElement("span");
-                    rolesSpan.classList.add("performance-roles");
-                    rolesSpan.textContent = " - " + rolesText;
-                    li.appendChild(rolesSpan);
-                }
-
-                perfList.appendChild(li);
-            });
-        }
+        renderPerformances(card.querySelector(".performance-list"), eventData.performances);
 
         // 初期状態では非表示
         card.querySelectorAll(".response-list").forEach(ul => ul.style.display = "none");
@@ -1195,6 +1145,119 @@ function initChatBot() {
     }
 }
 
+
+/* =======================================================
+演目フォーム
+======================================================= */
+function buildPerfItem(data = {}) {
+    const item = document.createElement("div");
+    item.className = "perf-item";
+
+    item.innerHTML = `
+        <div class="perf-item-header">
+            <input class="perf-no" type="text" placeholder="No." value="${data.no || ''}">
+            <input class="perf-time-from" type="time" value="${data.timeFrom || ''}">
+            <span>〜</span>
+            <input class="perf-time-to" type="time" value="${data.timeTo || ''}">
+            <input class="perf-name" type="text" placeholder="演目名" value="${data.name || ''}">
+            <button type="button" class="perf-remove-btn">✕</button>
+        </div>
+        <div class="perf-drums">
+            <input class="perf-taiko-dai" type="text" placeholder="大太鼓" value="${data.taikoDai || ''}">
+            <input class="perf-taiko-ko" type="text" placeholder="小太鼓" value="${data.taikoKo || ''}">
+        </div>
+        <div class="perf-roles-container"></div>
+        <button type="button" class="perf-add-role-btn">＋ 役割を追加</button>
+    `;
+
+    item.querySelector(".perf-remove-btn").addEventListener("click", () => item.remove());
+    item.querySelector(".perf-add-role-btn").addEventListener("click", () => {
+        addRoleRow(item.querySelector(".perf-roles-container"));
+    });
+
+    const rolesContainer = item.querySelector(".perf-roles-container");
+    const roles = Array.isArray(data.roles) ? data.roles : [{ label: "演者", members: "" }, { label: "獅子", members: "" }];
+    roles.forEach(r => addRoleRow(rolesContainer, r));
+
+    return item;
+}
+
+function addRoleRow(container, data = {}) {
+    const row = document.createElement("div");
+    row.className = "perf-role-row";
+    row.innerHTML = `
+        <input class="perf-role-label" type="text" placeholder="役割名" value="${data.label || ''}">
+        <textarea class="perf-role-members" placeholder="名前（複数行可）">${data.members || ''}</textarea>
+        <button type="button" class="perf-role-remove">✕</button>
+    `;
+    row.querySelector(".perf-role-remove").addEventListener("click", () => row.remove());
+    container.appendChild(row);
+}
+
+function collectPerformances() {
+    const performances = [];
+    document.querySelectorAll("#performanceList .perf-item").forEach(item => {
+        const name = item.querySelector(".perf-name")?.value.trim();
+        if (!name) return;
+        const roles = [];
+        item.querySelectorAll(".perf-role-row").forEach(row => {
+            const label = row.querySelector(".perf-role-label")?.value.trim();
+            const members = row.querySelector(".perf-role-members")?.value.trim();
+            if (label) roles.push({ label, members });
+        });
+        performances.push({
+            no: item.querySelector(".perf-no")?.value.trim(),
+            timeFrom: item.querySelector(".perf-time-from")?.value,
+            timeTo: item.querySelector(".perf-time-to")?.value,
+            name,
+            taikoDai: item.querySelector(".perf-taiko-dai")?.value.trim(),
+            taikoKo: item.querySelector(".perf-taiko-ko")?.value.trim(),
+            roles
+        });
+    });
+    return performances;
+}
+
+function renderPerformances(container, performances) {
+    if (!container) return;
+    container.innerHTML = "";
+    if (!Array.isArray(performances) || !performances.length) return;
+
+    performances.forEach(perf => {
+        const div = document.createElement("div");
+        div.className = "perf-detail-item";
+
+        // No.バッジ
+        const noBadge = perf.no ? `<span class="perf-no-badge">${perf.no}</span>` : "";
+        // 時刻
+        const time = (perf.timeFrom || perf.timeTo)
+            ? `<span class="perf-detail-time">${perf.timeFrom || ""}〜${perf.timeTo || ""}</span>`
+            : "";
+        // 演目名
+        const name = `<span class="perf-detail-name">${perf.name || ""}</span>`;
+
+        let html = `<div class="perf-detail-header">${noBadge}${time}${name}</div>`;
+
+        // 太鼓
+        if (perf.taikoDai || perf.taikoKo) {
+            html += `<div class="perf-detail-drums">`;
+            if (perf.taikoDai) html += `<span>大太鼓: ${perf.taikoDai}</span>`;
+            if (perf.taikoKo) html += `<span>小太鼓: ${perf.taikoKo}</span>`;
+            html += `</div>`;
+        }
+
+        // 役割（新形式: roles配列 / 旧形式: roles object）
+        const rolesArr = Array.isArray(perf.roles)
+            ? perf.roles
+            : Object.entries(perf.roles || {}).map(([label, members]) => ({ label, members }));
+        rolesArr.forEach(r => {
+            html += `<div class="perf-detail-role"><span class="perf-role-label-text">${r.label}:</span><span class="perf-role-members-text">${r.members || ""}</span></div>`;
+        });
+
+        div.innerHTML = html;
+        container.appendChild(div);
+    });
+}
 
 /* =======================================================
 カレンダー描画

@@ -5,7 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css">
-
+<link rel="stylesheet" href="css/otabi.css">
+<style>
+/* ===== 演目フォーム ===== */
+.perf-item { background: var(--surface-2,#f5f5f5); border: 1px solid var(--border,#ddd); border-radius: var(--radius-md,8px); padding: 10px; margin-bottom: 10px; }
+.perf-item-header { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
+.perf-item-header input { flex: 1; min-width: 60px; padding: 4px 6px; border: 1px solid var(--border,#ddd); border-radius: var(--radius-sm,4px); font-size: 13px; }
+.perf-no { max-width: 50px !important; }
+.perf-name { max-width: 160px !important; }
+.perf-remove-btn { background: #e55; color: #fff; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-size: 12px; flex-shrink: 0; }
+.perf-drums { display: flex; gap: 6px; margin-bottom: 6px; }
+.perf-drums input { flex: 1; padding: 4px 6px; border: 1px solid var(--border,#ddd); border-radius: var(--radius-sm,4px); font-size: 13px; }
+.perf-roles-container { display: flex; flex-direction: column; gap: 4px; margin-bottom: 6px; }
+.perf-role-row { display: flex; gap: 6px; align-items: flex-start; }
+.perf-role-label { width: 80px; flex-shrink: 0; padding: 4px 6px; border: 1px solid var(--border,#ddd); border-radius: var(--radius-sm,4px); font-size: 13px; }
+.perf-role-members { flex: 1; padding: 4px 6px; border: 1px solid var(--border,#ddd); border-radius: var(--radius-sm,4px); font-size: 13px; min-height: 32px; resize: vertical; }
+.perf-role-remove { background: #e55; color: #fff; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 11px; flex-shrink: 0; margin-top: 4px; }
+.perf-add-role-btn { background: none; border: 1px dashed var(--accent-teal,#5badad); color: var(--accent-teal,#5badad); border-radius: var(--radius-sm,4px); padding: 3px 10px; font-size: 12px; cursor: pointer; width: 100%; }
+/* ===== 演目詳細表示 ===== */
+.perf-detail-item { background: var(--surface-2,#f5f5f5); border-radius: var(--radius-md,8px); padding: 10px; margin-bottom: 8px; }
+.perf-detail-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+.perf-no-badge { background: var(--accent,#c0392b); color: #fff; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; flex-shrink: 0; }
+.perf-detail-time { font-size: 12px; color: var(--text-2,#666); }
+.perf-detail-name { font-weight: bold; }
+.perf-detail-drums { display: flex; gap: 12px; font-size: 12px; color: var(--text-2,#666); margin-bottom: 4px; }
+.perf-detail-role { display: flex; gap: 8px; font-size: 13px; margin-bottom: 2px; }
+.perf-role-label-text { font-weight: 500; color: var(--text-2,#666); min-width: 60px; flex-shrink: 0; }
+.perf-role-members-text { color: var(--text-1,#333); white-space: pre-wrap; }
+</style>
 </head>
 
 <body>
@@ -138,6 +165,7 @@
                     <li class="tab-item" data-target="member-management">メンバー管理</li>
                     <li class="tab-item" data-target="event-management">イベント管理</li>
                     <li class="tab-item" data-target="practice-management">練習日管理</li>
+                    <li class="tab-item" data-target="otabi-management">お旅管理</li>
                 </ul>
             </section>
         </div>
@@ -185,7 +213,7 @@
         </div>
 
         <button class="toggle-performances-btn">演目一覧</button>
-        <ul class="performance-list"></ul>
+        <div class="performance-list"></div>
         </div>
     </div>
 
@@ -323,7 +351,105 @@
 
 </div>
 
+<!-- ===== お旅管理カード ===== -->
+<div class="member-card otabi-card" id="otabiCard">
+    <button class="close-card-btn" data-target="otabi">戻る</button>
+    <div class="otabi-card-title">お旅管理</div>
+    <div class="otabi-tabs">
+        <button class="otabi-tab-btn active" data-otabi-tab="places">場所管理</button>
+        <button class="otabi-tab-btn" data-otabi-tab="schedule">スケジュール</button>
+        <button class="otabi-tab-btn" data-otabi-tab="donation">御花集計</button>
+    </div>
+
+    <!-- 場所管理タブ -->
+    <div class="otabi-tab-content active" id="otabiPlacesTab">
+        <button class="otabi-add-btn" id="addPlaceBtn">＋ 場所を追加</button>
+        <div id="otabiPlacesList"></div>
+    </div>
+
+    <!-- スケジュールタブ -->
+    <div class="otabi-tab-content" id="otabiScheduleTab">
+        <div class="otabi-schedule-header">
+            <select id="otabiYearSelect"></select>
+            <select id="otabiGroupSelect">
+                <option value="A">A班</option>
+                <option value="B">B班</option>
+            </select>
+            <button class="otabi-add-btn" id="addEntryBtn">＋ 一括入力</button>
+        </div>
+        <div id="otabiScheduleList"></div>
+        <button class="otabi-copy-btn" id="copyScheduleBtn">前年からコピー</button>
+    </div>
+
+    <!-- 御花集計タブ -->
+    <div class="otabi-tab-content" id="otabiDonationTab">
+        <div id="otabiDonationList"></div>
+    </div>
+</div>
+
+<!-- 場所フォームカード -->
+<div class="member-card otabi-form-card" id="otabiPlaceFormCard">
+    <button class="close-card-btn" data-target="otabi-place-form">戻る</button>
+    <div class="otabi-form-card-title">場所登録</div>
+    <input type="hidden" id="placeId">
+    <div class="otabi-form-group">
+        <label>場所名</label>
+        <input type="text" id="placeName" placeholder="場所名を入力">
+    </div>
+    <div class="otabi-form-group">
+        <label>住所</label>
+        <input type="text" id="placeAddress" placeholder="住所を入力">
+    </div>
+    <div class="otabi-form-group">
+        <label>メモ</label>
+        <textarea id="placeMemo" placeholder="メモ"></textarea>
+    </div>
+    <button class="save-event-btn" id="savePlaceBtn">保存</button>
+</div>
+
+<!-- スケジュール1件入力フォームカード（編集用） -->
+<div class="member-card otabi-form-card" id="otabiEntryFormCard">
+    <button class="close-card-btn" data-target="otabi-entry-form">戻る</button>
+    <div class="otabi-form-card-title">スケジュール編集</div>
+    <input type="hidden" id="entryId">
+    <div class="otabi-form-group">
+        <label>No.</label>
+        <input type="number" id="entryNo" placeholder="番号">
+    </div>
+    <div class="otabi-form-group">
+        <label>時間</label>
+        <input type="time" id="entryTime">
+    </div>
+    <div class="otabi-form-group">
+        <label>場所</label>
+        <select id="entryPlace"></select>
+    </div>
+    <div class="otabi-form-group">
+        <label>場所名（表示用）</label>
+        <input type="text" id="entryPlaceName" placeholder="表示名">
+    </div>
+    <div class="otabi-form-group">
+        <label>メモ</label>
+        <textarea id="entryMemo" placeholder="メモ"></textarea>
+    </div>
+    <div class="otabi-form-group">
+        <label>御花</label>
+        <input type="number" id="entryDonation" placeholder="金額">
+    </div>
+    <button class="save-event-btn" id="saveEntryBtn">保存</button>
+</div>
+
+<!-- スケジュール一括入力カード -->
+<div class="member-card otabi-form-card" id="otabiBulkEntryCard">
+    <button class="close-card-btn" data-target="otabi-bulk-entry">戻る</button>
+    <div class="otabi-form-card-title">スケジュール一括入力</div>
+    <div id="otabiBulkRows"></div>
+    <button class="otabi-add-btn" id="addBulkRowBtn">＋ 行を追加</button>
+    <button class="save-event-btn" id="saveBulkEntriesBtn" style="margin: 4px 16px 8px;">一括保存</button>
+</div>
+
 <script src="js/config.js"></script>
+<script src="js/otabi.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

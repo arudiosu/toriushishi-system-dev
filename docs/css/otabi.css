@@ -1,0 +1,70 @@
+/* =======================================================
+  お旅管理 スタイル
+======================================================= */
+.otabi-card { padding: 0 0 80px; }
+.otabi-card-title { font-size: 18px; font-weight: bold; padding: 16px 16px 8px; }
+
+/* タブ */
+.otabi-tabs { display: flex; border-bottom: 2px solid var(--border, #ddd); margin-bottom: 12px; }
+.otabi-tab-btn { flex: 1; padding: 10px 4px; background: none; border: none; font-size: 13px; color: var(--text-2, #666); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color 0.2s; }
+.otabi-tab-btn.active { color: var(--accent, #c0392b); border-bottom-color: var(--accent, #c0392b); font-weight: bold; }
+
+/* タブコンテンツ */
+.otabi-tab-content { display: none; padding: 0 12px; }
+.otabi-tab-content.active { display: block; }
+
+/* 追加ボタン */
+.otabi-add-btn { background: var(--accent, #c0392b); color: #fff; border: none; border-radius: var(--radius-sm, 4px); padding: 8px 16px; font-size: 14px; cursor: pointer; margin-bottom: 10px; }
+
+/* コピーボタン */
+.otabi-copy-btn { background: none; border: 1px solid var(--border, #ddd); border-radius: var(--radius-sm, 4px); padding: 6px 14px; font-size: 12px; color: var(--text-2, #666); cursor: pointer; margin-top: 10px; }
+
+/* 場所アイテム */
+.otabi-place-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid var(--border, #ddd); gap: 8px; }
+.otabi-place-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.otabi-place-name { font-weight: 500; }
+.otabi-place-address { font-size: 12px; color: var(--text-2, #666); }
+.otabi-map-link { font-size: 12px; color: var(--accent-teal, #5badad); text-decoration: none; }
+.otabi-map-link:hover { text-decoration: underline; }
+.otabi-place-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+/* スケジュールヘッダー */
+.otabi-schedule-header { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+.otabi-schedule-header select { padding: 6px 8px; border: 1px solid var(--border, #ddd); border-radius: var(--radius-sm, 4px); font-size: 13px; }
+
+/* スケジュールアイテム */
+.otabi-schedule-item { display: flex; align-items: center; gap: 6px; padding: 8px 4px; border-bottom: 1px solid var(--border, #ddd); flex-wrap: wrap; }
+.otabi-entry-no { font-size: 12px; color: var(--text-2, #666); min-width: 24px; }
+.otabi-entry-time { font-size: 13px; min-width: 50px; }
+.otabi-entry-place { flex: 1; font-size: 14px; }
+.otabi-entry-donation { font-size: 12px; color: var(--text-2, #666); }
+.otabi-map-icon { color: var(--accent-teal, #5badad); width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(91,173,173,0.1); text-decoration: none; font-size: 13px; flex-shrink: 0; }
+.otabi-map-icon:hover { background: rgba(91,173,173,0.25); }
+
+/* 編集・削除ボタン */
+.otabi-edit-btn { background: var(--surface-3, #e8e8e8); border: none; border-radius: var(--radius-sm, 4px); padding: 4px 10px; font-size: 12px; cursor: pointer; }
+.otabi-delete-btn { background: #fde; border: none; border-radius: var(--radius-sm, 4px); padding: 4px 10px; font-size: 12px; color: #c00; cursor: pointer; }
+
+/* フォームカード */
+.otabi-form-card { padding: 16px; }
+.otabi-form-card-title { font-size: 16px; font-weight: bold; margin-bottom: 14px; }
+.otabi-form-group { margin-bottom: 12px; }
+.otabi-form-group label { display: block; font-size: 12px; color: var(--text-2, #666); margin-bottom: 4px; }
+.otabi-form-group input, .otabi-form-group select, .otabi-form-group textarea { width: 100%; padding: 8px; border: 1px solid var(--border, #ddd); border-radius: var(--radius-sm, 4px); font-size: 14px; box-sizing: border-box; }
+.otabi-form-group textarea { min-height: 60px; resize: vertical; }
+
+/* 一括入力 */
+.otabi-bulk-row { background: var(--surface-2, #f5f5f5); border-radius: var(--radius-md, 8px); padding: 10px; margin-bottom: 8px; }
+.otabi-bulk-top { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+.otabi-bulk-top input, .otabi-bulk-top select { padding: 6px; border: 1px solid var(--border, #ddd); border-radius: var(--radius-sm, 4px); font-size: 13px; }
+.otabi-bulk-top select { flex: 1; }
+.otabi-bulk-bottom { display: flex; gap: 6px; flex-wrap: wrap; }
+.otabi-bulk-bottom input { flex: 1; min-width: 80px; padding: 6px; border: 1px solid var(--border, #ddd); border-radius: var(--radius-sm, 4px); font-size: 13px; }
+.otabi-bulk-remove { background: #e55; color: #fff; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 12px; flex-shrink: 0; }
+
+/* 御花集計 */
+.otabi-donation-item { display: flex; justify-content: space-between; padding: 8px 4px; border-bottom: 1px solid var(--border, #ddd); font-size: 14px; }
+.otabi-donation-total { padding: 10px 4px; font-weight: bold; font-size: 15px; text-align: right; }
+
+/* 空メッセージ */
+.otabi-empty { padding: 20px; text-align: center; color: var(--text-2, #999); font-size: 14px; }

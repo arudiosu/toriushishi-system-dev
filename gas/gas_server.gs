@@ -109,6 +109,38 @@ function doPost(e) {
         result = getPerformanceRoles();
         break;
 
+      case "getOtabiPlaces":
+        result = getOtabiPlacesGAS();
+        break;
+
+      case "saveOtabiPlace":
+        result = saveOtabiPlaceGAS(data.place);
+        break;
+
+      case "deleteOtabiPlace":
+        result = deleteOtabiPlaceGAS(data.placeId);
+        break;
+
+      case "getOtabiSchedule":
+        result = getOtabiScheduleGAS(data.year, data.group);
+        break;
+
+      case "saveOtabiEntry":
+        result = saveOtabiEntryGAS(data.entry);
+        break;
+
+      case "deleteOtabiEntry":
+        result = deleteOtabiEntryGAS(data.entryId);
+        break;
+
+      case "copyOtabiSchedule":
+        result = copyOtabiScheduleGAS(data.fromYear, data.toYear, data.group);
+        break;
+
+      case "getOtabiDonations":
+        result = getOtabiDonationsGAS(data.year, data.group);
+        break;
+
       default:
         result = { success: false, msg: "unknown action" };
     }
