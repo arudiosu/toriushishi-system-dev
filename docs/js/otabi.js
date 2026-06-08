@@ -38,12 +38,16 @@ function renderOtabiPlaces() {
     }
     list.innerHTML = otabiPlaces.map(p => {
         const gc = p.group === '上' ? 'ue' : p.group === '下' ? 'shita' : 'joint';
+        const addressHtml = p.address
+            ? `<a class="otabi-map-link" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address)}" target="_blank" rel="noopener">${p.address}</a>`
+            : '';
+        const sub = [addressHtml, p.tel].filter(Boolean).join(' ／ ');
         return `
         <div class="otabi-item" data-place-id="${p.place_id}">
             <span class="otabi-badge otabi-badge-${gc}">${p.group || '-'}</span>
             <div class="otabi-item-body">
                 <div class="otabi-item-title">${p.name}</div>
-                <div class="otabi-item-sub">${[p.address, p.tel].filter(Boolean).join(' ／ ')}</div>
+                ${sub ? `<div class="otabi-item-sub">${sub}</div>` : ''}
             </div>
             <button class="otabi-action-btn edit-place-btn" data-id="${p.place_id}">編集</button>
         </div>`;
