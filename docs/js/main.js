@@ -195,7 +195,6 @@ function renderScheduleHome(events, practices = []) {
     });
     practices.forEach(pr => {
         const d = new Date(pr.date); d.setHours(0,0,0,0);
-        // 練習カードは本日のみ表示
         if (d.getTime() === today.getTime()) items.push({ type: "practice", date: d, data: pr });
     });
     items.sort((a, b) => a.date - b.date);
@@ -317,12 +316,15 @@ function initEventDelegation() {
         if (closeTarget) {
             const targetType = closeTarget.dataset.target;
             switch (targetType) {
-                case "event":            document.getElementById("eventDetailCard")?.classList.remove("active"); break;
-                case "practice":         document.getElementById("practiceDetailCard")?.classList.remove("active"); break;
-                case "member":           document.getElementById("membersCardUser")?.classList.remove("active"); break;
-                case "member-management":document.getElementById("membersCardAdmin")?.classList.remove("active"); break;
-                case "create":           document.getElementById("eventCreateCard")?.classList.remove("active"); break;
-                case "practice-create":  document.getElementById("practiceCreateCard")?.classList.remove("active"); break;
+                case "event":              document.getElementById("eventDetailCard")?.classList.remove("active"); break;
+                case "practice":           document.getElementById("practiceDetailCard")?.classList.remove("active"); break;
+                case "member":             document.getElementById("membersCardUser")?.classList.remove("active"); break;
+                case "member-management":  document.getElementById("membersCardAdmin")?.classList.remove("active"); break;
+                case "create":             document.getElementById("eventCreateCard")?.classList.remove("active"); break;
+                case "practice-create":    document.getElementById("practiceCreateCard")?.classList.remove("active"); break;
+                case "otabi":              document.getElementById("otabiCard")?.classList.remove("active"); break;
+                case "otabi-place-form":   document.getElementById("otabiPlaceFormCard")?.classList.remove("active"); break;
+                case "otabi-entry-form":   document.getElementById("otabiEntryFormCard")?.classList.remove("active"); break;
             }
             return;
         }
@@ -358,6 +360,11 @@ document.querySelectorAll(".tab-item").forEach(tab => {
         if (targetTab === "practice-management") {
             if (userRole === "user") { alert("管理者のみアクセスできます。"); return; }
             openPracticeCreateForm();
+            return;
+        }
+        if (targetTab === "otabi-management") {
+            if (userRole === "user") { alert("管理者のみアクセスできます。"); return; }
+            openOtabiCard();
             return;
         }
     });
@@ -876,7 +883,7 @@ function generateCalendar(year, month, direction) {
         gridHtml += `<div class="empty"></div>`;
     }
     for (let d = 1; d <= totalDays; d++) {
-        const fullDate = `${year}/${String(month+1).padStart(2,"0")}/${String(d).padStart(2,"00")}`;
+        const fullDate = `${year}/${String(month+1).padStart(2,"0")}/${String(d).padStart(2,"0")}`;
         const event = Object.values(eventMap).find(e => normalize(e.date) === normalize(fullDate));
         const practice = Object.values(practiceMap).find(p => normalize(p.date) === normalize(fullDate));
         let dots = "";
@@ -901,7 +908,6 @@ function generateCalendar(year, month, direction) {
         <div class="cal-grid">${gridHtml}</div>
     `;
 
-    // スライドアニメーション
     if (direction) {
         cal.style.transition = "none";
         cal.style.transform  = `translateX(${direction > 0 ? "30%" : "-30%"})`;
@@ -920,7 +926,6 @@ function generateCalendar(year, month, direction) {
         cal.innerHTML = newHtml;
     }
 
-    // 日クリック
     function selectDay(dayElem) {
         cal.querySelectorAll(".day.selected").forEach(el => el.classList.remove("selected"));
         dayElem.classList.add("selected");
@@ -931,14 +936,12 @@ function generateCalendar(year, month, direction) {
         day.addEventListener("click", () => selectDay(day));
     });
 
-    // 今日のセルを自動選択
     if (isCurrentMonth) {
         const todayStr = `${year}/${String(month+1).padStart(2,"0")}/${String(todayObj.getDate()).padStart(2,"0")}`;
         const todayCell = cal.querySelector(`.day[data-date="${todayStr}"]`);
         if (todayCell) selectDay(todayCell);
     }
 
-    // 月ボタン
     cal.querySelector(".cal-prev").addEventListener("click", () => {
         const prev = new Date(year, month - 1);
         generateCalendar(prev.getFullYear(), prev.getMonth(), 1);
@@ -947,8 +950,6 @@ function generateCalendar(year, month, direction) {
         const next = new Date(year, month + 1);
         generateCalendar(next.getFullYear(), next.getMonth(), -1);
     });
-
-    // 年ボタン
     cal.querySelector(".cal-prev-year").addEventListener("click", () => {
         generateCalendar(year - 1, month, 1);
     });
@@ -964,7 +965,6 @@ function generateCalendar(year, month, direction) {
         });
     }
 
-    // スワイプ操作
     let touchStartX = 0;
     let touchStartY = 0;
     cal.addEventListener("touchstart", (e) => {

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/otabi.css">
 <style>
 .practice-mode-toggle { margin: 8px 0; }
 .weekday-select { margin-top: 8px; }
@@ -296,24 +297,19 @@
         <ul id="memberListAdmin"></ul>
     </div>
 
-    <!-- ===== お旅管理メインカード ===== -->
+    <!-- お旅管理メインカード -->
     <div class="member-card otabi-card" id="otabiCard">
         <button class="close-card-btn" data-target="otabi">戻る</button>
         <div class="otabi-card-title">お旅管理</div>
-
         <div class="otabi-tab-bar">
             <button class="otabi-tab-btn active" data-tab="places">訪問先</button>
             <button class="otabi-tab-btn" data-tab="schedule">スケジュール</button>
             <button class="otabi-tab-btn" data-tab="donations">お花代</button>
         </div>
-
-        <!-- 訪問先タブ -->
         <div class="otabi-tab-pane active" data-tab="places">
             <div id="otabiPlacesList" class="otabi-list-area"></div>
             <button class="otabi-add-btn" id="addPlaceBtn">＋ 訪問先を追加</button>
         </div>
-
-        <!-- スケジュールタブ -->
         <div class="otabi-tab-pane" data-tab="schedule">
             <div class="otabi-controls">
                 <div class="otabi-year-nav">
@@ -333,8 +329,6 @@
             <div id="otabiScheduleList" class="otabi-list-area"></div>
             <button class="otabi-add-btn" id="addEntryBtn">＋ 追加</button>
         </div>
-
-        <!-- お花代タブ -->
         <div class="otabi-tab-pane" data-tab="donations">
             <div class="otabi-controls">
                 <div class="otabi-year-nav">
@@ -419,5 +413,6 @@
 
 <script src="js/config.js"></script>
 <script src="js/main.js"></script>
+<script src="js/otabi.js"></script>
 </body>
 </html>
