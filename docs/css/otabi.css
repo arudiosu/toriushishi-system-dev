@@ -89,6 +89,12 @@
 .otabi-item-title { font-size: .93rem; font-weight: 600; }
 .otabi-item-sub   { font-size: .76rem; color: var(--text-2); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+.otabi-map-link {
+  color: var(--accent-teal);
+  text-decoration: none;
+}
+.otabi-map-link:active { text-decoration: underline; }
+
 .otabi-action-btn {
   flex-shrink: 0;
   padding: 5px 12px;
