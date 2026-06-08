@@ -319,3 +319,89 @@
   width: calc(100% - 32px);
   text-align: center;
 }
+
+/* --- 一括入力フォーム --- */
+#otabiBulkRows {
+  padding: 8px 16px 0;
+}
+
+.otabi-bulk-row {
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.otabi-bulk-top {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.otabi-bulk-top .bulk-no {
+  width: 64px;
+}
+
+.otabi-bulk-top .bulk-time {
+  flex: 1;
+}
+
+.otabi-bulk-remove {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--surface-3);
+  border: none;
+  color: var(--text-3);
+  font-size: .85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.otabi-bulk-remove:active { background: rgba(217,55,62,.2); color: #d9373e; }
+
+.otabi-bulk-bottom {
+  display: flex;
+  gap: 8px;
+}
+
+.otabi-bulk-bottom .bulk-memo {
+  flex: 1;
+}
+
+.otabi-bulk-bottom .bulk-donation {
+  width: 100px;
+}
+
+.otabi-bulk-row input,
+.otabi-bulk-row select {
+  padding: 9px 12px;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-1);
+  font-size: .9rem;
+  -webkit-appearance: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.otabi-bulk-row input:focus,
+.otabi-bulk-row select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.otabi-bulk-row select {
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%23a0a0a0' d='M4 6l4 4 4-4'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 14px;
+  padding-right: 30px;
+}

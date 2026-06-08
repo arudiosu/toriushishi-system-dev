@@ -17,7 +17,7 @@
 <body>
 
 <div id="loading">
-    <img src="images/鳥生獅子連中＿loading.png" alt="ローディング" class="loading-img rotating">
+    <img src="images/鳥生獅子連中＿ loading.png" alt="ローディング" class="loading-img rotating">
 </div>
 
 <div id="globalLoading" class="loading-overlay" style="display:none;">
@@ -327,7 +327,7 @@
                 <button class="otabi-action-chip" id="shareScheduleBtn">テキスト共有</button>
             </div>
             <div id="otabiScheduleList" class="otabi-list-area"></div>
-            <button class="otabi-add-btn" id="addEntryBtn">＋ 追加</button>
+            <button class="otabi-add-btn" id="addEntryBtn">＋ 一括入力</button>
         </div>
         <div class="otabi-tab-pane" data-tab="donations">
             <div class="otabi-controls">
@@ -349,7 +349,7 @@
         <div class="otabi-form-body">
             <div class="otabi-form-field">
                 <label>訪問先名 *</label>
-                <input type="text" id="placeFormName" placeholder="例：はち八" />
+                <input type="text" id="placeFormName" placeholder="例：はち7" />
             </div>
             <div class="otabi-form-field">
                 <label>住所</label>
@@ -372,10 +372,10 @@
         <button class="otabi-delete-btn" id="deletePlaceBtn" style="display:none;">削除</button>
     </div>
 
-    <!-- スケジュールエントリフォームカード -->
+    <!-- スケジュールエントリフォームカード（編集用） -->
     <div class="member-card otabi-form-card" id="otabiEntryFormCard">
         <button class="close-card-btn" data-target="otabi-entry-form">戻る</button>
-        <div class="otabi-form-card-title">スケジュール入力</div>
+        <div class="otabi-form-card-title">スケジュール編集</div>
         <input type="hidden" id="entryFormId" />
         <div class="otabi-form-body">
             <div class="otabi-form-row">
@@ -407,6 +407,15 @@
         </div>
         <button class="save-event-btn" id="saveEntryBtn">保存</button>
         <button class="otabi-delete-btn" id="deleteEntryBtn" style="display:none;">削除</button>
+    </div>
+
+    <!-- スケジュール一括入力カード -->
+    <div class="member-card otabi-form-card" id="otabiBulkEntryCard">
+        <button class="close-card-btn" data-target="otabi-bulk-entry">戻る</button>
+        <div class="otabi-form-card-title">スケジュール一括入力</div>
+        <div id="otabiBulkRows"></div>
+        <button class="otabi-add-btn" id="addBulkRowBtn">＋ 行を追加</button>
+        <button class="save-event-btn" id="saveBulkEntriesBtn" style="margin: 4px 16px 8px;">一括保存</button>
     </div>
 
 </div>
