@@ -324,6 +324,7 @@ function initEventDelegation() {
                 case "otabi":              document.getElementById("otabiCard")?.classList.remove("active"); break;
                 case "otabi-place-form":   document.getElementById("otabiPlaceFormCard")?.classList.remove("active"); break;
                 case "otabi-entry-form":   document.getElementById("otabiEntryFormCard")?.classList.remove("active"); break;
+                case "otabi-bulk-entry":   document.getElementById("otabiBulkEntryCard")?.classList.remove("active"); break;
             }
             return;
         }
@@ -936,7 +937,7 @@ function generateCalendar(year, month, direction) {
     });
 
     if (isCurrentMonth) {
-        const todayStr = `${year}/${String(month+1).padStart(2,"0")}/${String(todayObj.getDate()).padStart(2,"0")}`;
+        const todayStr = `${year}/${String(month+1).padStart(2,"00")}/${String(todayObj.getDate()).padStart(2,"00")}`;
         const todayCell = cal.querySelector(`.day[data-date="${todayStr}"]`);
         if (todayCell) selectDay(todayCell);
     }
