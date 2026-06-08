@@ -195,7 +195,8 @@ function renderScheduleHome(events, practices = []) {
     });
     practices.forEach(pr => {
         const d = new Date(pr.date); d.setHours(0,0,0,0);
-        if (d >= today) items.push({ type: "practice", date: d, data: pr });
+        // 練習カードは本日のみ表示
+        if (d.getTime() === today.getTime()) items.push({ type: "practice", date: d, data: pr });
     });
     items.sort((a, b) => a.date - b.date);
     const fragment = document.createDocumentFragment();
@@ -875,7 +876,7 @@ function generateCalendar(year, month, direction) {
         gridHtml += `<div class="empty"></div>`;
     }
     for (let d = 1; d <= totalDays; d++) {
-        const fullDate = `${year}/${String(month+1).padStart(2,"0")}/${String(d).padStart(2,"0")}`;
+        const fullDate = `${year}/${String(month+1).padStart(2,"0")}/${String(d).padStart(2,"00")}`;
         const event = Object.values(eventMap).find(e => normalize(e.date) === normalize(fullDate));
         const practice = Object.values(practiceMap).find(p => normalize(p.date) === normalize(fullDate));
         let dots = "";
@@ -888,19 +889,20 @@ function generateCalendar(year, month, direction) {
 
     const newHtml = `
         <div class="cal-header">
-            <button class="cal-prev">&#8249;</button>
+            <button class="cal-prev-year" title="前の年">&#171;</button>
+            <button class="cal-prev" title="前の月">&#8249;</button>
             <div class="cal-header-center">
                 <span class="cal-year-month">${year}年 ${month+1}月</span>
                 ${!isCurrentMonth ? `<button class="cal-today-btn">今月</button>` : ""}
             </div>
-            <button class="cal-next">&#8250;</button>
+            <button class="cal-next" title="次の月">&#8250;</button>
+            <button class="cal-next-year" title="次の年">&#187;</button>
         </div>
         <div class="cal-grid">${gridHtml}</div>
     `;
 
     // スライドアニメーション
     if (direction) {
-        const outDir = direction > 0 ? "-30%" : "30%";
         cal.style.transition = "none";
         cal.style.transform  = `translateX(${direction > 0 ? "30%" : "-30%"})`;
         cal.style.opacity    = "0";
@@ -936,7 +938,7 @@ function generateCalendar(year, month, direction) {
         if (todayCell) selectDay(todayCell);
     }
 
-    // ボタン
+    // 月ボタン
     cal.querySelector(".cal-prev").addEventListener("click", () => {
         const prev = new Date(year, month - 1);
         generateCalendar(prev.getFullYear(), prev.getMonth(), 1);
@@ -945,6 +947,15 @@ function generateCalendar(year, month, direction) {
         const next = new Date(year, month + 1);
         generateCalendar(next.getFullYear(), next.getMonth(), -1);
     });
+
+    // 年ボタン
+    cal.querySelector(".cal-prev-year").addEventListener("click", () => {
+        generateCalendar(year - 1, month, 1);
+    });
+    cal.querySelector(".cal-next-year").addEventListener("click", () => {
+        generateCalendar(year + 1, month, -1);
+    });
+
     const todayBtn = cal.querySelector(".cal-today-btn");
     if (todayBtn) {
         todayBtn.addEventListener("click", () => {
