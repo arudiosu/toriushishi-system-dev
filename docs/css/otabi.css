@@ -95,6 +95,22 @@
 }
 .otabi-map-link:active { text-decoration: underline; }
 
+.otabi-map-icon {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-teal);
+  font-size: 1rem;
+  text-decoration: none;
+  border-radius: 50%;
+  transition: background var(--transition);
+  -webkit-tap-highlight-color: transparent;
+}
+.otabi-map-icon:active { background: rgba(6,214,160,.15); }
+
 .otabi-action-btn {
   flex-shrink: 0;
   padding: 5px 12px;
