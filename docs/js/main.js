@@ -33,8 +33,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const ok = await checkSessionAndGetUserId();
     if (!ok) return;
 
-    await getEvents();
-    await getPractices();
+    await Promise.all([getEvents(), getPractices()]);
 
     loadHomeEvents();   
     loadEventEvents(); 
@@ -723,7 +722,7 @@ async function updatePracticeResponse(practiceId, answer, card, userId) {
         fillResponseList(card.querySelector("ul.response-list.absent"), result.absent);
         fillResponseList(card.querySelector("ul.response-list.late"), result.late);
         card.querySelector(".toggle-response-btn.absent").textContent = `欠席 ${result.absent.length}人`;
-        card.querySelector(".toggle-response-btn.late").textContent   = `遅刻 ${result.late.length}人`;
+        card.querySelector(".toggle-response-btn.late").textContent   = `遅れて参加 ${result.late.length}人`;
     } catch (e) { console.error(e); }
     if (loadingOverlay) loadingOverlay.style.display = "none";
 }
