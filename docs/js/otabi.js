@@ -197,6 +197,82 @@ async function deleteEntryForm() {
     } finally { loadingOverlay.style.display = "none"; }
 }
 
+// ===== 一括入力 =====
+
+async function openBulkEntryForm() {
+    if (!otabiPlaces.length) {
+        const res = await callGasApi({ action: "getOtabiPlaces" });
+        otabiPlaces = res.places || [];
+    }
+    const container = document.getElementById("otabiBulkRows");
+    container.innerHTML = "";
+    const nextNo = otabiScheduleEntries.length > 0
+        ? Math.max(...otabiScheduleEntries.map(e => Number(e.no) || 0)) + 1 : 1;
+    for (let i = 0; i < 3; i++) addBulkRow(nextNo + i);
+    document.getElementById("otabiBulkEntryCard").classList.add("active");
+}
+
+function addBulkRow(no) {
+    const container = document.getElementById("otabiBulkRows");
+    if (no == null) {
+        const rows = container.querySelectorAll(".otabi-bulk-row");
+        const nums = [...rows].map(r => Number(r.querySelector(".bulk-no").value) || 0);
+        no = nums.length ? Math.max(...nums) + 1 : 1;
+    }
+    const selectOptions = '<option value="">― マスタから選択 ―</option>' +
+        otabiPlaces.map(p => `<option value="${p.place_id}">${p.name}（${p.group}）</option>`).join('');
+    const div = document.createElement("div");
+    div.className = "otabi-bulk-row";
+    div.innerHTML = `
+        <div class="otabi-bulk-top">
+            <input type="number" class="bulk-no" placeholder="No." value="${no}" min="1" />
+            <input type="time" class="bulk-time" />
+            <button class="otabi-bulk-remove" type="button">✕</button>
+        </div>
+        <select class="bulk-place-select">${selectOptions}</select>
+        <input type="text" class="bulk-place-name" placeholder="訪問先名 *" />
+        <div class="otabi-bulk-bottom">
+            <input type="text" class="bulk-memo" placeholder="メモ" />
+            <input type="number" class="bulk-donation" placeholder="¥0" min="0" step="500" />
+        </div>
+    `;
+    div.querySelector(".otabi-bulk-remove").addEventListener("click", () => div.remove());
+    div.querySelector(".bulk-place-select").addEventListener("change", e => {
+        const p = otabiPlaces.find(pl => pl.place_id == e.target.value);
+        if (p) div.querySelector(".bulk-place-name").value = p.name;
+    });
+    container.appendChild(div);
+}
+
+async function saveBulkEntries() {
+    const rows = document.querySelectorAll("#otabiBulkRows .otabi-bulk-row");
+    const entries = [];
+    rows.forEach(row => {
+        const name = row.querySelector(".bulk-place-name").value.trim();
+        if (!name) return;
+        entries.push({
+            entry_id: null,
+            year: otabiYear,
+            group: otabiGroup,
+            no: Number(row.querySelector(".bulk-no").value) || 0,
+            time: row.querySelector(".bulk-time").value,
+            place_id: row.querySelector(".bulk-place-select").value || "",
+            place_name: name,
+            memo: row.querySelector(".bulk-memo").value.trim(),
+            donation: Number(row.querySelector(".bulk-donation").value) || 0
+        });
+    });
+    if (!entries.length) return alert("訪問先名を1件以上入力してください");
+    if (!confirm(`${entries.length}件のスケジュールを保存しますか？`)) return;
+    loadingOverlay.style.display = "flex";
+    try {
+        await Promise.all(entries.map(entry => callGasApi({ action: "saveOtabiEntry", entry })));
+        document.getElementById("otabiBulkEntryCard").classList.remove("active");
+        await loadOtabiSchedule();
+    } catch(e) { alert("保存中にエラーが発生しました"); }
+    finally { loadingOverlay.style.display = "none"; }
+}
+
 async function copyOtabiSchedule() {
     const fromYear = otabiYear - 1;
     if (!confirm(`${fromYear}年の${otabiGroup}スケジュールを${otabiYear}年にコピーしますか？\n(お花代はリセットされます)`)) return;
@@ -281,7 +357,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("otabiDonYearPrev")?.addEventListener("click",  () => { otabiYear--; loadOtabiDonations(); });
     document.getElementById("otabiDonYearNext")?.addEventListener("click",  () => { otabiYear++; loadOtabiDonations(); });
     document.getElementById("addPlaceBtn")?.addEventListener("click", () => openPlaceForm());
-    document.getElementById("addEntryBtn")?.addEventListener("click", () => openEntryForm());
+    document.getElementById("addEntryBtn")?.addEventListener("click", () => openBulkEntryForm());
+    document.getElementById("addBulkRowBtn")?.addEventListener("click", () => addBulkRow());
+    document.getElementById("saveBulkEntriesBtn")?.addEventListener("click", saveBulkEntries);
     document.getElementById("copyScheduleBtn")?.addEventListener("click", copyOtabiSchedule);
     document.getElementById("shareScheduleBtn")?.addEventListener("click", shareOtabiSchedule);
     document.getElementById("savePlaceBtn")?.addEventListener("click", savePlaceForm);
