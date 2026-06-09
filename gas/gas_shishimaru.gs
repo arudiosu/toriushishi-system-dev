@@ -12,9 +12,10 @@ function getParticipationStatsGAS(filter) {
   const uMap = {};
   userRows[0].forEach((h, i) => uMap[h] = i);
 
+  // アクティブメンバーのみ（admin除く）
   const members = userRows.slice(1)
     .filter(r => r[uMap["status"]] === "active" && r[uMap["role"]] !== "admin")
-    .map(r => ({ userId: r[uMap["userId"]], name: r[uMap["username"]] }));
+    .map(r => ({ userId: r[uMap["userId"]], name: r[uMap["storedName"]] }));
 
   return filter === "practice"
     ? calcPracticeStats(ss, members)
@@ -29,13 +30,14 @@ function calcEventStats(ss, members) {
   const h = {};
   rows[0].forEach((v, i) => h[v] = i);
 
+  // イベントの総数
   const eventIds = [...new Set(rows.slice(1).map(r => r[h["eventId"]]).filter(Boolean))];
   const total = eventIds.length;
   if (!total) return { success: true, stats: [] };
 
   const stats = members.map(m => {
     const participated = rows.slice(1).filter(r =>
-      r[h["userId"]] == m.userId && r[h["answer"]] === "参加"
+      r[h["userId"]] == m.userId && r[h["status"]] === "参加"
     ).length;
     return { name: m.name, participated, total, rate: participated / total };
   });
@@ -57,9 +59,10 @@ function calcPracticeStats(ss, members) {
   rows[0].forEach((v, i) => h[v] = i);
 
   const stats = members.map(m => {
+    // 欠席・遅刻の数を数える（回答なし＝出席扱い）
     const absent = rows.slice(1).filter(r =>
       r[h["userId"]] == m.userId &&
-      (r[h["answer"]] === "欠席" || r[h["answer"]] === "遅刻")
+      (r[h["status"]] === "欠席" || r[h["status"]] === "遅刻")
     ).length;
     const participated = practiceTotal - absent;
     return { name: m.name, participated, total: practiceTotal, rate: participated / practiceTotal };
@@ -104,7 +107,7 @@ function saveMemoGAS(text, userId) {
     const h = {};
     rows[0].forEach((v, i) => h[v] = i);
     const row = rows.slice(1).find(r => r[h["userId"]] == userId);
-    if (row) userName = row[h["username"]] || userName;
+    if (row) userName = row[h["storedName"]] || userName;
   }
   const memoId = Date.now();
   const date = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy/MM/dd HH:mm");
