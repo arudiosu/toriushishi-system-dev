@@ -123,7 +123,7 @@ function doPost(e) {
         break;
 
       case "getOtabiSchedule":
-        result = getOtabiScheduleGAS(data.year, data.group);
+        result = getOtabiScheduleGAS(data.year, data.group, data.day);
         break;
 
       case "saveOtabiEntry":

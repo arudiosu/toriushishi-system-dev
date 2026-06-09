@@ -468,6 +468,14 @@
             <button class="otabi-tab-btn" data-tab="donations">お花代</button>
         </div>
         <div class="otabi-tab-pane active" data-tab="places">
+            <div class="otabi-controls">
+                <div class="otabi-group-toggle">
+                    <button class="otabi-place-filter-btn active" data-group="">すべて</button>
+                    <button class="otabi-place-filter-btn" data-group="上">上組</button>
+                    <button class="otabi-place-filter-btn" data-group="下">下組</button>
+                    <button class="otabi-place-filter-btn" data-group="合同">合同</button>
+                </div>
+            </div>
             <div id="otabiPlacesList" class="otabi-list-area"></div>
             <button class="otabi-add-btn" id="addPlaceBtn">＋ 訪問先を追加</button>
         </div>
@@ -478,9 +486,15 @@
                     <span id="otabiScheduleYear">2025</span>年
                     <button class="otabi-year-btn" id="otabiSchedYearNext">›</button>
                 </div>
+            </div>
+            <div class="otabi-controls">
                 <div class="otabi-group-toggle">
                     <button class="otabi-group-btn active" data-group="上組">上組</button>
                     <button class="otabi-group-btn" data-group="下組">下組</button>
+                </div>
+                <div class="otabi-group-toggle">
+                    <button class="otabi-day-btn active" data-day="土曜">土曜</button>
+                    <button class="otabi-day-btn" data-day="日曜">日曜</button>
                 </div>
             </div>
             <div class="otabi-action-row">
@@ -497,9 +511,15 @@
                     <span id="otabiDonYear">2025</span>年
                     <button class="otabi-year-btn" id="otabiDonYearNext">›</button>
                 </div>
+            </div>
+            <div class="otabi-controls">
                 <div class="otabi-group-toggle">
                     <button class="otabi-don-group-btn active" data-group="上組">上組</button>
                     <button class="otabi-don-group-btn" data-group="下組">下組</button>
+                </div>
+                <div class="otabi-group-toggle">
+                    <button class="otabi-don-day-btn active" data-day="土曜">土曜</button>
+                    <button class="otabi-don-day-btn" data-day="日曜">日曜</button>
                 </div>
             </div>
             <div id="otabiDonationTotal" class="otabi-don-total-bar"></div>
@@ -545,6 +565,13 @@
         <div class="otabi-form-card-title">スケジュール編集</div>
         <input type="hidden" id="entryFormId" />
         <div class="otabi-form-body">
+            <div class="otabi-form-field">
+                <label>曜日</label>
+                <div class="otabi-radio-group">
+                    <label><input type="radio" name="entryDay" value="土曜" checked> 土曜</label>
+                    <label><input type="radio" name="entryDay" value="日曜"> 日曜</label>
+                </div>
+            </div>
             <div class="otabi-form-row">
                 <div class="otabi-form-field half">
                     <label>No.</label>

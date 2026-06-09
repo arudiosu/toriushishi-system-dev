@@ -12,7 +12,15 @@ function ensureOtabiSheets() {
   let schedSheet = ss.getSheetByName("otabi_schedules");
   if (!schedSheet) {
     schedSheet = ss.insertSheet("otabi_schedules");
-    schedSheet.appendRow(["entry_id", "year", "group", "no", "time", "place_id", "place_name", "memo", "donation", "created_at", "updated_at"]);
+    schedSheet.appendRow(["entry_id", "year", "group", "day", "no", "time", "place_id", "place_name", "memo", "donation", "created_at", "updated_at"]);
+  } else {
+    // 既存シートに day 列がなければ追加
+    const headers = schedSheet.getRange(1, 1, 1, schedSheet.getLastColumn()).getValues()[0];
+    if (!headers.includes("day")) {
+      const groupIdx = headers.indexOf("group");
+      schedSheet.insertColumnAfter(groupIdx + 1);
+      schedSheet.getRange(1, groupIdx + 2).setValue("day");
+    }
   }
   return { placesSheet, schedSheet };
 }
@@ -70,7 +78,7 @@ function deleteOtabiPlaceGAS(placeId) {
   return { success: false, msg: "not found" };
 }
 
-function getOtabiScheduleGAS(year, group) {
+function getOtabiScheduleGAS(year, group, day) {
   const { schedSheet } = ensureOtabiSheets();
   const data = schedSheet.getDataRange().getValues();
   if (data.length <= 1) return { success: true, entries: [] };
@@ -79,7 +87,13 @@ function getOtabiScheduleGAS(year, group) {
   headers.forEach((h, i) => { P[h] = i; });
 
   const entries = data.slice(1)
-    .filter(row => row[0] && String(row[P["year"]]) === String(year) && row[P["group"]] === group)
+    .filter(row => {
+      if (!row[0]) return false;
+      if (String(row[P["year"]]) !== String(year)) return false;
+      if (row[P["group"]] !== group) return false;
+      if (day && P["day"] !== undefined && row[P["day"]] !== day) return false;
+      return true;
+    })
     .map(row => {
       const timeVal = row[P["time"]];
       const timeStr = timeVal instanceof Date
@@ -89,6 +103,7 @@ function getOtabiScheduleGAS(year, group) {
         entry_id: row[P["entry_id"]],
         year: row[P["year"]],
         group: row[P["group"]],
+        day: P["day"] !== undefined ? (row[P["day"]] || "土曜") : "土曜",
         no: row[P["no"]],
         time: timeStr,
         place_id: row[P["place_id"]],
@@ -113,13 +128,14 @@ function saveOtabiEntryGAS(entry) {
   if (entry.entry_id) {
     for (let r = 2; r <= data.length; r++) {
       if (Number(data[r-1][0]) === Number(entry.entry_id)) {
-        schedSheet.getRange(r, P["no"]).setValue(entry.no || "");
-        schedSheet.getRange(r, P["time"]).setValue(entry.time || "");
-        schedSheet.getRange(r, P["place_id"]).setValue(entry.place_id || "");
-        schedSheet.getRange(r, P["place_name"]).setValue(entry.place_name || "");
-        schedSheet.getRange(r, P["memo"]).setValue(entry.memo || "");
-        schedSheet.getRange(r, P["donation"]).setValue(Number(entry.donation) || 0);
-        schedSheet.getRange(r, P["updated_at"]).setValue(now);
+        if (P["day"] !== undefined) schedSheet.getRange(r, P["day"] + 1).setValue(entry.day || "土曜");
+        schedSheet.getRange(r, P["no"] + 1).setValue(entry.no || "");
+        schedSheet.getRange(r, P["time"] + 1).setValue(entry.time || "");
+        schedSheet.getRange(r, P["place_id"] + 1).setValue(entry.place_id || "");
+        schedSheet.getRange(r, P["place_name"] + 1).setValue(entry.place_name || "");
+        schedSheet.getRange(r, P["memo"] + 1).setValue(entry.memo || "");
+        schedSheet.getRange(r, P["donation"] + 1).setValue(Number(entry.donation) || 0);
+        schedSheet.getRange(r, P["updated_at"] + 1).setValue(now);
         return { success: true, entry_id: entry.entry_id };
       }
     }
@@ -128,7 +144,7 @@ function saveOtabiEntryGAS(entry) {
   const ids = data.slice(1).map(r => Number(r[0])).filter(n => n > 0);
   const newId = ids.length > 0 ? Math.max(...ids) + 1 : 1;
   schedSheet.appendRow([
-    newId, entry.year, entry.group,
+    newId, entry.year, entry.group, entry.day || "土曜",
     entry.no || "", entry.time || "",
     entry.place_id || "", entry.place_name || "",
     entry.memo || "", Number(entry.donation) || 0,
@@ -169,6 +185,7 @@ function copyOtabiScheduleGAS(fromYear, toYear, group) {
   src.forEach(row => {
     schedSheet.appendRow([
       nextId++, toYear, group,
+      P["day"] !== undefined ? (row[P["day"]] || "土曜") : "土曜",
       row[P["no"]] || "", row[P["time"]] || "",
       row[P["place_id"]] || "", row[P["place_name"]] || "",
       row[P["memo"]] || "", 0,
@@ -193,6 +210,7 @@ function getOtabiDonationsGAS(year) {
     .map(row => ({
       entry_id: row[P["entry_id"]],
       group: row[P["group"]],
+      day: P["day"] !== undefined ? (row[P["day"]] || "土曜") : "土曜",
       no: row[P["no"]],
       time: row[P["time"]] instanceof Date
         ? Utilities.formatDate(row[P["time"]], "Asia/Tokyo", "HH:mm")
@@ -201,7 +219,7 @@ function getOtabiDonationsGAS(year) {
       memo: row[P["memo"]],
       donation: Number(row[P["donation"]]) || 0
     }))
-    .sort((a, b) => a.group.localeCompare(b.group) || Number(a.no) - Number(b.no));
+    .sort((a, b) => a.group.localeCompare(b.group) || a.day.localeCompare(b.day) || Number(a.no) - Number(b.no));
 
   const total = entries.reduce((s, e) => s + e.donation, 0);
   const byGroup = {};

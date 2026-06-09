@@ -5,6 +5,10 @@ let otabiPlaces = [];
 let otabiScheduleEntries = [];
 let otabiYear = new Date().getFullYear();
 let otabiGroup = "上組";
+let otabiDay = "土曜";
+let otabiPlaceFilter = "";   // "" = すべて
+let otabiDonGroup = "上組";
+let otabiDonDay = "土曜";
 
 function openOtabiCard() {
     otabiYear = new Date().getFullYear();
@@ -32,11 +36,14 @@ async function loadOtabiPlaces() {
 
 function renderOtabiPlaces() {
     const list = document.getElementById("otabiPlacesList");
-    if (!otabiPlaces.length) {
+    const filtered = otabiPlaceFilter
+        ? otabiPlaces.filter(p => p.group === otabiPlaceFilter)
+        : otabiPlaces;
+    if (!filtered.length) {
         list.innerHTML = '<p class="no-event">訪問先が登録されていません</p>';
         return;
     }
-    list.innerHTML = otabiPlaces.map(p => {
+    list.innerHTML = filtered.map(p => {
         const gc = p.group === '上' ? 'ue' : p.group === '下' ? 'shita' : 'joint';
         const addressHtml = p.address
             ? `<a class="otabi-map-link" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address)}" target="_blank" rel="noopener">${p.address}</a>`
@@ -109,9 +116,10 @@ async function deletePlaceForm() {
 async function loadOtabiSchedule() {
     document.getElementById("otabiScheduleYear").textContent = otabiYear;
     document.querySelectorAll(".otabi-group-btn").forEach(b => b.classList.toggle("active", b.dataset.group === otabiGroup));
+    document.querySelectorAll(".otabi-day-btn").forEach(b => b.classList.toggle("active", b.dataset.day === otabiDay));
     const list = document.getElementById("otabiScheduleList");
     list.innerHTML = [1,2,3].map(() => '<div class="skeleton skeleton-card"></div>').join('');
-    const fetches = [callGasApi({ action: "getOtabiSchedule", year: otabiYear, group: otabiGroup })];
+    const fetches = [callGasApi({ action: "getOtabiSchedule", year: otabiYear, group: otabiGroup, day: otabiDay })];
     if (!otabiPlaces.length) fetches.push(callGasApi({ action: "getOtabiPlaces" }));
     const [schedRes, placesRes] = await Promise.all(fetches);
     otabiScheduleEntries = schedRes.entries || [];
@@ -156,6 +164,8 @@ async function openEntryForm(entry = null) {
         otabiPlaces = res.places || [];
     }
     document.getElementById("entryFormId").value = entry?.entry_id || "";
+    const entryDay = entry?.day || otabiDay;
+    document.querySelectorAll('input[name="entryDay"]').forEach(r => { r.checked = r.value === entryDay; });
     const nextNo = otabiScheduleEntries.length > 0
         ? Math.max(...otabiScheduleEntries.map(e => Number(e.no) || 0)) + 1 : 1;
     document.getElementById("entryFormNo").value = entry?.no ?? nextNo;
@@ -183,6 +193,7 @@ async function saveEntryForm() {
         entry_id: id ? Number(id) : null,
         year: otabiYear,
         group: otabiGroup,
+        day: document.querySelector('input[name="entryDay"]:checked')?.value || "土曜",
         no: Number(document.getElementById("entryFormNo").value) || 0,
         time: document.getElementById("entryFormTime").value,
         place_id: document.getElementById("entryFormPlaceSelect").value || "",
@@ -268,6 +279,7 @@ async function saveBulkEntries() {
             entry_id: null,
             year: otabiYear,
             group: otabiGroup,
+            day: otabiDay,
             no: Number(row.querySelector(".bulk-no").value) || 0,
             time: row.querySelector(".bulk-time").value,
             place_id: row.querySelector(".bulk-place-select").value || "",
@@ -322,18 +334,19 @@ async function shareOtabiSchedule() {
 
 // ===== お花代（Excel風一括入力） =====
 
-let otabiDonEntries = [];      // 表示中グループのエントリ
-let otabiDonGroup = "上組";
+let otabiDonEntries = [];      // 表示中グループ＋曜日のエントリ
 
 async function loadOtabiDonations() {
     document.getElementById("otabiDonYear").textContent = otabiYear;
     document.querySelectorAll(".otabi-don-group-btn").forEach(b =>
         b.classList.toggle("active", b.dataset.group === otabiDonGroup));
+    document.querySelectorAll(".otabi-don-day-btn").forEach(b =>
+        b.classList.toggle("active", b.dataset.day === otabiDonDay));
     const grid = document.getElementById("otabiDonationGrid");
     grid.innerHTML = '<div class="skeleton skeleton-card"></div>';
     const res = await callGasApi({ action: "getOtabiDonations", year: otabiYear });
     const all = (res.success && res.entries) ? res.entries : [];
-    otabiDonEntries = all.filter(e => e.group === otabiDonGroup);
+    otabiDonEntries = all.filter(e => e.group === otabiDonGroup && e.day === otabiDonDay);
     renderOtabiDonations();
 }
 
@@ -386,7 +399,7 @@ function renderOtabiDonations() {
 function updateDonationTotal() {
     const total = otabiDonEntries.reduce((s, e) => s + (Number(e.donation) || 0), 0);
     document.getElementById("otabiDonationTotal").innerHTML =
-        `${otabiDonGroup} 合計 <span>￥${total.toLocaleString()}</span>`;
+        `${otabiDonGroup}・${otabiDonDay} 合計 <span>￥${total.toLocaleString()}</span>`;
 }
 
 async function saveOtabiDonations() {
@@ -410,15 +423,32 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".otabi-tab-btn").forEach(btn =>
         btn.addEventListener("click", () => switchOtabiTab(btn.dataset.tab))
     );
+    // 訪問先フィルタ
+    document.querySelectorAll(".otabi-place-filter-btn").forEach(btn =>
+        btn.addEventListener("click", () => {
+            document.querySelectorAll(".otabi-place-filter-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            otabiPlaceFilter = btn.dataset.group;
+            renderOtabiPlaces();
+        })
+    );
+    // スケジュール
     document.querySelectorAll(".otabi-group-btn").forEach(btn =>
         btn.addEventListener("click", () => { otabiGroup = btn.dataset.group; loadOtabiSchedule(); })
     );
+    document.querySelectorAll(".otabi-day-btn").forEach(btn =>
+        btn.addEventListener("click", () => { otabiDay = btn.dataset.day; loadOtabiSchedule(); })
+    );
     document.getElementById("otabiSchedYearPrev")?.addEventListener("click", () => { otabiYear--; loadOtabiSchedule(); });
     document.getElementById("otabiSchedYearNext")?.addEventListener("click", () => { otabiYear++; loadOtabiSchedule(); });
+    // お花代
     document.getElementById("otabiDonYearPrev")?.addEventListener("click",  () => { otabiYear--; loadOtabiDonations(); });
     document.getElementById("otabiDonYearNext")?.addEventListener("click",  () => { otabiYear++; loadOtabiDonations(); });
     document.querySelectorAll(".otabi-don-group-btn").forEach(btn =>
         btn.addEventListener("click", () => { otabiDonGroup = btn.dataset.group; loadOtabiDonations(); })
+    );
+    document.querySelectorAll(".otabi-don-day-btn").forEach(btn =>
+        btn.addEventListener("click", () => { otabiDonDay = btn.dataset.day; loadOtabiDonations(); })
     );
     document.getElementById("saveDonationsBtn")?.addEventListener("click", saveOtabiDonations);
     document.getElementById("addPlaceBtn")?.addEventListener("click", () => openPlaceForm());

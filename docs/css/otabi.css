@@ -183,6 +183,23 @@
 }
 .otabi-group-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
+/* 曜日・フィルタボタン（group-btnと同スタイル） */
+.otabi-day-btn,
+.otabi-place-filter-btn {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  background: transparent;
+  color: var(--text-2);
+  font-size: .85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  -webkit-tap-highlight-color: transparent;
+}
+.otabi-day-btn.active { background: var(--accent-teal, #0d9488); border-color: var(--accent-teal, #0d9488); color: #fff; }
+.otabi-place-filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
 .otabi-action-row {
   display: flex;
   gap: 8px;
