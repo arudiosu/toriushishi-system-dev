@@ -9,6 +9,7 @@ const calendarArea = document.getElementById("calendarArea");
 let scheduleContainer = [];
 let eventMap = {};
 let practiceMap = {};
+let cachedMemberNames = [];
 
 
 /* =======================================================
@@ -272,14 +273,22 @@ function addRoleRow(container, data = {}) {
     const row = document.createElement("div");
     row.className = "perf-role-row";
     const escQ = s => (s || '').replace(/"/g, '&quot;');
+    const selectedNames = (data.members || '').split('\n').map(s => s.trim()).filter(Boolean);
+    const names = cachedMemberNames.length ? cachedMemberNames : selectedNames;
+    const allNames = [...new Set([...names, ...selectedNames])];
     row.innerHTML = `
         <div class="perf-role-row-top">
             <input type="text" class="role-label-input" placeholder="役割（演者・獅子・子役・中台・土台…）" value="${escQ(data.label || '')}">
             <button class="role-remove-btn" type="button">✕</button>
         </div>
-        <textarea class="role-members-input" placeholder="名前（複数の場合は改行で区切る）" rows="2">${data.members || ''}</textarea>
+        <div class="role-member-chips">
+            ${allNames.map(name => `<button type="button" class="role-member-chip${selectedNames.includes(name) ? ' selected' : ''}" data-name="${escQ(name)}">${escHtml(name)}</button>`).join('')}
+        </div>
     `;
     row.querySelector(".role-remove-btn").addEventListener("click", () => row.remove());
+    row.querySelectorAll(".role-member-chip").forEach(chip => {
+        chip.addEventListener("click", () => chip.classList.toggle("selected"));
+    });
     container.appendChild(row);
 }
 
@@ -294,8 +303,8 @@ function collectPerformances() {
         const roles = [];
         item.querySelectorAll(".perf-role-row").forEach(row => {
             const label = row.querySelector(".role-label-input")?.value.trim();
-            const members = row.querySelector(".role-members-input")?.value.trim();
-            if (label) roles.push({ label, members: members || "" });
+            const selected = [...row.querySelectorAll(".role-member-chip.selected")].map(c => c.dataset.name);
+            if (label) roles.push({ label, members: selected.join('\n') });
         });
         performances.push({
             no: item.querySelector(".perf-no-input")?.value || "",
@@ -466,6 +475,7 @@ async function loadMembersUser() {
     ]);
     const gearMap = {};
     (gearRes?.members || []).forEach(m => { gearMap[m.userId] = m.gear || {}; });
+    cachedMemberNames = res.members.filter(m => m.status === "active").map(m => m.name);
     list.innerHTML = "";
     res.members.filter(m => m.status === "active").forEach(m => list.appendChild(buildMemberItemUser(m, gearMap[m.userId])));
     overlay.style.display = "none";

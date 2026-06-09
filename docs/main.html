@@ -89,7 +89,12 @@
     -webkit-appearance: none;
 }
 .perf-role-row input[type="text"] { background: var(--surface-2); font-size: 16px; }
-.perf-role-row textarea { background: var(--surface-2); font-size: 16px; }
+.role-member-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 0; }
+.role-member-chip {
+    padding: 4px 10px; border-radius: 100px; border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--text-2); font-size: .82rem; cursor: pointer;
+}
+.role-member-chip.selected { background: var(--accent-teal, #0d9488); color: #fff; border-color: transparent; }
 .perf-item textarea { resize: vertical; font-family: inherit; min-height: 48px; }
 /* ===== 演目詳細表示 ===== */
 .performance-list { padding: 4px 0; }
