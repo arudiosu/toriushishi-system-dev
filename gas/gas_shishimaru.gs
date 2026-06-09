@@ -12,10 +12,14 @@ function getParticipationStatsGAS(filter) {
   const uMap = {};
   userRows[0].forEach((h, i) => uMap[h] = i);
 
-  // アクティブメンバー全員（管理者も含む）
+  // アクティブメンバー全員（管理者も含む）、created_at付き
   const members = userRows.slice(1)
     .filter(r => r[uMap["status"]] === "active")
-    .map(r => ({ userId: r[uMap["userId"]], name: r[uMap["storedName"]] }));
+    .map(r => ({
+      userId: r[uMap["userId"]],
+      name: r[uMap["storedName"]],
+      createdAt: r[uMap["created_at"]] ? new Date(r[uMap["created_at"]]) : null
+    }));
 
   return filter === "practice"
     ? calcPracticeStats(ss, members)
@@ -23,12 +27,22 @@ function getParticipationStatsGAS(filter) {
 }
 
 function calcEventStats(ss, members) {
-  // イベント総数はeventsシートから取得
   const eventSheet = ss.getSheetByName("events");
-  const total = eventSheet
-    ? eventSheet.getDataRange().getValues().slice(1).filter(r => r[0]).length
-    : 0;
-  if (!total) return { success: true, stats: [] };
+  if (!eventSheet) return { success: true, stats: [] };
+
+  const eventRows = eventSheet.getDataRange().getValues();
+  const eH = {};
+  eventRows[0].forEach((v, i) => eH[v] = i);
+
+  // 全イベントを日付付きで取得
+  const allEvents = eventRows.slice(1)
+    .filter(r => r[0])
+    .map(r => {
+      const d = r[eH["date"]];
+      return { eventId: r[eH["eventId"]], date: d instanceof Date ? d : new Date(String(d).replace(/\//g, "-")) };
+    });
+
+  if (!allEvents.length) return { success: true, stats: [] };
 
   const ansSheet = ss.getSheetByName("answers-events");
   const rows = ansSheet ? ansSheet.getDataRange().getValues() : [[]];
@@ -36,8 +50,18 @@ function calcEventStats(ss, members) {
   rows[0].forEach((v, i) => h[v] = i);
 
   const stats = members.map(m => {
+    // 登録日以降のイベントのみ対象
+    const eligibleEvents = m.createdAt
+      ? allEvents.filter(ev => ev.date >= m.createdAt)
+      : allEvents;
+    const total = eligibleEvents.length;
+    if (!total) return { name: m.name, participated: 0, total: 0, rate: 0 };
+
+    const eligibleIds = new Set(eligibleEvents.map(ev => String(ev.eventId)));
     const participated = rows.slice(1).filter(r =>
-      r[h["userId"]] == m.userId && r[h["status"]] === "参加"
+      r[h["userId"]] == m.userId &&
+      r[h["status"]] === "参加" &&
+      eligibleIds.has(String(r[h["eventId"]]))
     ).length;
     return { name: m.name, participated, total, rate: participated / total };
   });
@@ -48,10 +72,21 @@ function calcEventStats(ss, members) {
 
 function calcPracticeStats(ss, members) {
   const practiceSheet = ss.getSheetByName("practices");
-  const practiceTotal = practiceSheet
-    ? practiceSheet.getDataRange().getValues().slice(1).filter(r => r[0]).length
-    : 0;
-  if (!practiceTotal) return { success: true, stats: [] };
+  if (!practiceSheet) return { success: true, stats: [] };
+
+  const practiceRows = practiceSheet.getDataRange().getValues();
+  const pH = {};
+  practiceRows[0].forEach((v, i) => pH[v] = i);
+
+  // 全練習を日付付きで取得
+  const allPractices = practiceRows.slice(1)
+    .filter(r => r[0])
+    .map(r => {
+      const d = r[pH["date"]];
+      return { practiceId: r[pH["practiceId"]], date: d instanceof Date ? d : new Date(String(d).replace(/\//g, "-")) };
+    });
+
+  if (!allPractices.length) return { success: true, stats: [] };
 
   const sheet = ss.getSheetByName("answers-practices");
   const rows = sheet ? sheet.getDataRange().getValues() : [[]];
@@ -59,13 +94,22 @@ function calcPracticeStats(ss, members) {
   rows[0].forEach((v, i) => h[v] = i);
 
   const stats = members.map(m => {
-    // 欠席・遅刻の数を数える（回答なし＝出席扱い）
+    // 登録日以降の練習のみ対象
+    const eligiblePractices = m.createdAt
+      ? allPractices.filter(p => p.date >= m.createdAt)
+      : allPractices;
+    const total = eligiblePractices.length;
+    if (!total) return { name: m.name, participated: 0, total: 0, rate: 0 };
+
+    const eligibleIds = new Set(eligiblePractices.map(p => String(p.practiceId)));
+    // 欠席・遅刻の数（対象練習のみ）
     const absent = rows.slice(1).filter(r =>
       r[h["userId"]] == m.userId &&
-      (r[h["status"]] === "欠席" || r[h["status"]] === "遅刻")
+      (r[h["status"]] === "欠席" || r[h["status"]] === "遅刻") &&
+      eligibleIds.has(String(r[h["practiceId"]]))
     ).length;
-    const participated = practiceTotal - absent;
-    return { name: m.name, participated, total: practiceTotal, rate: participated / practiceTotal };
+    const participated = total - absent;
+    return { name: m.name, participated, total, rate: participated / total };
   });
 
   stats.sort((a, b) => b.rate - a.rate);
