@@ -142,6 +142,22 @@ function doPost(e) {
         result = getOtabiDonationsGAS(data.year);
         break;
 
+      case "getParticipationStats":
+        result = getParticipationStatsGAS(data.filter || "event");
+        break;
+
+      case "getMemos":
+        result = getMemosGAS();
+        break;
+
+      case "saveMemo":
+        result = saveMemoGAS(data.text, data.userId);
+        break;
+
+      case "deleteMemo":
+        result = deleteMemoGAS(data.memoId, data.userId);
+        break;
+
       default:
         result = { success: false, msg: "unknown action" };
     }
