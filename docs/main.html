@@ -89,12 +89,18 @@
     -webkit-appearance: none;
 }
 .perf-role-row input[type="text"] { background: var(--surface-2); font-size: 16px; }
-.role-member-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 0; }
-.role-member-chip {
-    padding: 4px 10px; border-radius: 100px; border: 1px solid var(--border);
-    background: var(--surface-2); color: var(--text-2); font-size: .82rem; cursor: pointer;
+.perf-role-row select { background: var(--surface-2); font-size: 16px; }
+.role-member-selected { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 0; }
+.role-member-tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 6px 4px 10px; border-radius: 100px;
+    background: var(--accent-teal, #0d9488); color: #fff; font-size: .82rem;
 }
-.role-member-chip.selected { background: var(--accent-teal, #0d9488); color: #fff; border-color: transparent; }
+.role-member-tag-remove {
+    background: rgba(255,255,255,.25); border: none; color: #fff;
+    border-radius: 50%; width: 16px; height: 16px; font-size: .6rem;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
+}
 .perf-item textarea { resize: vertical; font-family: inherit; min-height: 48px; }
 /* ===== 演目詳細表示 ===== */
 .performance-list { padding: 4px 0; }

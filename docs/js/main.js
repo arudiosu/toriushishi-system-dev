@@ -196,6 +196,14 @@ function createPracticeCard(pr) {
 /* =======================================================
 演目フォームヘルパー
 ======================================================= */
+function memberOptionsHtml(selected, placeholder = "選択") {
+    const escQ = s => (s || '').replace(/"/g, '&quot;');
+    const names = [...cachedMemberNames];
+    if (selected && !names.includes(selected)) names.push(selected);
+    const opts = names.map(n => `<option value="${escQ(n)}"${n === selected ? ' selected' : ''}>${escHtml(n)}</option>`).join('');
+    return `<option value="">${placeholder}</option>${opts}`;
+}
+
 function buildPerfItem(data = {}) {
     const div = document.createElement("div");
     div.className = "perf-item";
@@ -226,8 +234,8 @@ function buildPerfItem(data = {}) {
         </select>
         <input type="text" class="perf-name" placeholder="演目名を入力" style="display:none;" value="${escQ(data.name || '')}">
         <div class="perf-drums">
-            <input type="text" class="perf-taiko-dai" placeholder="大太鼓" value="${escQ(data.taikoDai || '')}">
-            <input type="text" class="perf-taiko-ko" placeholder="小太鼓" value="${escQ(data.taikoKo || '')}">
+            <select class="perf-taiko-dai">${memberOptionsHtml(data.taikoDai, "大太鼓")}</select>
+            <select class="perf-taiko-ko">${memberOptionsHtml(data.taikoKo, "小太鼓")}</select>
         </div>
         <div class="perf-roles-list"></div>
         <button class="perf-add-role-btn" type="button">＋ 役割を追加（演者・獅子・子役・台…）</button>
@@ -274,20 +282,30 @@ function addRoleRow(container, data = {}) {
     row.className = "perf-role-row";
     const escQ = s => (s || '').replace(/"/g, '&quot;');
     const selectedNames = (data.members || '').split('\n').map(s => s.trim()).filter(Boolean);
-    const names = cachedMemberNames.length ? cachedMemberNames : selectedNames;
-    const allNames = [...new Set([...names, ...selectedNames])];
     row.innerHTML = `
         <div class="perf-role-row-top">
             <input type="text" class="role-label-input" placeholder="役割（演者・獅子・子役・中台・土台…）" value="${escQ(data.label || '')}">
             <button class="role-remove-btn" type="button">✕</button>
         </div>
-        <div class="role-member-chips">
-            ${allNames.map(name => `<button type="button" class="role-member-chip${selectedNames.includes(name) ? ' selected' : ''}" data-name="${escQ(name)}">${escHtml(name)}</button>`).join('')}
-        </div>
+        <div class="role-member-selected"></div>
+        <select class="role-member-select">${memberOptionsHtml("", "＋ メンバーを追加")}</select>
     `;
     row.querySelector(".role-remove-btn").addEventListener("click", () => row.remove());
-    row.querySelectorAll(".role-member-chip").forEach(chip => {
-        chip.addEventListener("click", () => chip.classList.toggle("selected"));
+    const selectedBox = row.querySelector(".role-member-selected");
+    const addMember = (name) => {
+        if (!name || [...selectedBox.querySelectorAll(".role-member-tag")].some(t => t.dataset.name === name)) return;
+        const tag = document.createElement("span");
+        tag.className = "role-member-tag";
+        tag.dataset.name = name;
+        tag.innerHTML = `${escHtml(name)}<button type="button" class="role-member-tag-remove">✕</button>`;
+        tag.querySelector(".role-member-tag-remove").addEventListener("click", () => tag.remove());
+        selectedBox.appendChild(tag);
+    };
+    selectedNames.forEach(addMember);
+    const memberSelect = row.querySelector(".role-member-select");
+    memberSelect.addEventListener("change", () => {
+        addMember(memberSelect.value);
+        memberSelect.value = "";
     });
     container.appendChild(row);
 }
@@ -303,7 +321,7 @@ function collectPerformances() {
         const roles = [];
         item.querySelectorAll(".perf-role-row").forEach(row => {
             const label = row.querySelector(".role-label-input")?.value.trim();
-            const selected = [...row.querySelectorAll(".role-member-chip.selected")].map(c => c.dataset.name);
+            const selected = [...row.querySelectorAll(".role-member-tag")].map(t => t.dataset.name);
             if (label) roles.push({ label, members: selected.join('\n') });
         });
         performances.push({
