@@ -20,7 +20,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     initEventDelegation();
     initShishimaru();
     scheduleContainer = [homeScheduleContainer, eventActiveScheduleContainer, eventPastScheduleContainer];
-    showSkeleton(scheduleContainer);
+    showSkeleton([homeScheduleContainer], 1);
+    showSkeleton([eventActiveScheduleContainer, eventPastScheduleContainer], 2);
     showCalendarSkeleton();
     const ok = await checkSessionAndGetUserId();
     if (!ok) return;
@@ -90,15 +91,10 @@ function initBottomNav() {
 /* =======================================================
 スケルトン
 ======================================================= */
-function showSkeleton(containers) {
+function showSkeleton(containers, count = 2) {
     containers.forEach(container => {
         if (!container) return;
-        container.innerHTML = "";
-        for (let i = 0; i < 4; i++) {
-            const sk = document.createElement("div");
-            sk.className = "skeleton skeleton-card";
-            container.appendChild(sk);
-        }
+        container.innerHTML = Array(count).fill('<div class="skeleton skeleton-card"></div>').join('');
     });
 }
 function showCalendarSkeleton() {

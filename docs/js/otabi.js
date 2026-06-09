@@ -26,9 +26,10 @@ function switchOtabiTab(tab) {
 
 // ===== 訪問先マスタ =====
 
-async function loadOtabiPlaces() {
+async function loadOtabiPlaces(forceReload = false) {
+    if (!forceReload && otabiPlaces.length) { renderOtabiPlaces(); return; }
     const list = document.getElementById("otabiPlacesList");
-    list.innerHTML = [1,2,3].map(() => '<div class="skeleton skeleton-card"></div>').join('');
+    list.innerHTML = '<div class="skeleton skeleton-card"></div>';
     const res = await callGasApi({ action: "getOtabiPlaces" });
     otabiPlaces = res.places || [];
     renderOtabiPlaces();
@@ -95,6 +96,7 @@ async function savePlaceForm() {
         const res = await callGasApi({ action: "saveOtabiPlace", place });
         if (!res.success) throw new Error("保存失敗");
         document.getElementById("otabiPlaceFormCard").classList.remove("active");
+        otabiPlaces = [];
         await loadOtabiPlaces();
     } catch(e) { alert("保存中にエラーが発生しました"); }
     finally { loadingOverlay.style.display = "none"; }
@@ -107,6 +109,7 @@ async function deletePlaceForm() {
     try {
         await callGasApi({ action: "deleteOtabiPlace", placeId: Number(id) });
         document.getElementById("otabiPlaceFormCard").classList.remove("active");
+        otabiPlaces = [];
         await loadOtabiPlaces();
     } finally { loadingOverlay.style.display = "none"; }
 }
@@ -181,10 +184,7 @@ function renderOtabiSchedule() {
 }
 
 async function openEntryForm(entry = null) {
-    if (!otabiPlaces.length) {
-        const res = await callGasApi({ action: "getOtabiPlaces" });
-        otabiPlaces = res.places || [];
-    }
+    if (!otabiPlaces.length) await loadOtabiPlaces();
     document.getElementById("entryFormId").value = entry?.entry_id || "";
     const entryDay = entry?.day || otabiDay;
     document.querySelectorAll('input[name="entryDay"]').forEach(r => { r.checked = r.value === entryDay; });
@@ -247,10 +247,7 @@ async function deleteEntryForm() {
 // ===== 一括入力 =====
 
 async function openBulkEntryForm() {
-    if (!otabiPlaces.length) {
-        const res = await callGasApi({ action: "getOtabiPlaces" });
-        otabiPlaces = res.places || [];
-    }
+    if (!otabiPlaces.length) await loadOtabiPlaces();
     const container = document.getElementById("otabiBulkRows");
     container.innerHTML = "";
     const nextNo = otabiScheduleEntries.length > 0
