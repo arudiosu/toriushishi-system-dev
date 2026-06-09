@@ -206,123 +206,199 @@ animation: shimmer 1.2s infinite;
 
 
 /*====================================
-        AIチャットタブデザイン
+        ししまるタブ
 ====================================*/
 
-/* 入力欄をボトムナビの上に固定 */
-.chat-input-area {
-position: fixed;
-bottom: calc(5rem + env(safe-area-inset-bottom) + 1rem); /* ボトムナビの高さ分上に */
-left: 0;
-width: 100%;
-display: flex;
-padding: 10px;
-background-color: #111;
-gap: 8px;
-border-top: 1px solid #333;
-z-index: 15; /* ボトムナビより上に表示 */
-box-sizing: border-box; /* パディング込みで幅100% */
+/* タブ切り替え */
+.shishi-tabs {
+    display: flex;
+    border-bottom: 2px solid #444;
+    margin-bottom: 12px;
 }
-
-/* 入力欄内 */
-#chat-input {
-    flex: 1 1 auto;   /* 残り幅を自動調整 */
-    min-width: 0;     /* overflow防止 */
-    padding: 10px 16px;
-    font-size: 16px;
-    border-radius: 20px;
+.shishi-tab-btn {
+    flex: 1;
+    padding: 10px 4px;
+    background: none;
     border: none;
-    background-color: #222;
+    font-size: 14px;
+    color: #aaa;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.2s;
+}
+.shishi-tab-btn.active {
+    color: #D32F2F;
+    border-bottom-color: #D32F2F;
+    font-weight: bold;
+}
+.shishi-tab-content { display: none; }
+.shishi-tab-content.active { display: block; }
+
+/* 参加率フィルター */
+.stats-filter {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding: 0 4px;
+}
+.stats-filter-btn {
+    padding: 6px 18px;
+    border-radius: 20px;
+    border: 1px solid #555;
+    background: none;
+    color: #aaa;
+    font-size: 13px;
+    cursor: pointer;
+}
+.stats-filter-btn.active {
+    background: #D32F2F;
+    border-color: #D32F2F;
     color: #fff;
-    box-sizing: border-box; /* パディング込みで幅計算 */
 }
 
-/* 送信ボタン */
-#chat-send-btn {
-flex: 0 0 auto;   /* 幅をテキスト＋paddingに固定 */
-padding: 0 16px;
-border-radius: 20px;
-border: none;
-background-color: #007aff;
-color: #fff;
-cursor: pointer;
-box-sizing: border-box;
+/* 参加率カード */
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid #333;
+}
+.stat-rank {
+    font-size: 12px;
+    color: #888;
+    width: 20px;
+    flex-shrink: 0;
+    text-align: center;
+}
+.stat-name {
+    font-size: 14px;
+    width: 80px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.stat-bar-wrap {
+    flex: 1;
+    background: #333;
+    border-radius: 6px;
+    height: 10px;
+    overflow: hidden;
+}
+.stat-bar {
+    height: 100%;
+    border-radius: 6px;
+    background: #D32F2F;
+    transition: width 0.4s ease;
+}
+.stat-pct {
+    font-size: 13px;
+    color: #ccc;
+    width: 36px;
+    text-align: right;
+    flex-shrink: 0;
+}
+.stat-count {
+    font-size: 11px;
+    color: #666;
+    width: 48px;
+    text-align: right;
+    flex-shrink: 0;
+}
+.stats-empty {
+    padding: 30px;
+    text-align: center;
+    color: #666;
+    font-size: 14px;
 }
 
-
-#chat-send-btn:hover {
-background-color: #005fbb;
+/* 気づきメモ */
+.memo-input-area {
+    position: fixed;
+    bottom: calc(5rem + env(safe-area-inset-bottom) + 1rem);
+    left: 0;
+    width: 100%;
+    display: flex;
+    padding: 8px 12px;
+    background-color: #1a1a1a;
+    gap: 8px;
+    border-top: 1px solid #333;
+    z-index: 15;
+    box-sizing: border-box;
+    align-items: flex-end;
 }
-
-/* メッセージエリアの高さを調整 */
-#ai-chat-area {
-flex: 1;
-overflow-y: auto;
-padding: 12px;
-display: flex;
-flex-direction: column;
-gap: 10px;
-scroll-behavior: smooth;
-
-/* 入力欄が固定されるので、その分余白を下に確保 */
-padding-bottom: calc(5rem + 60px); /* ボトムナビ + 入力欄の高さ */
+#memoInput {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 14px;
+    font-size: 14px;
+    border-radius: 16px;
+    border: 1px solid #444;
+    background: #2a2a2a;
+    color: #fff;
+    resize: none;
+    box-sizing: border-box;
+    line-height: 1.4;
 }
-
-/* 既存のバブルデザイン */
-.chat-msg {
-padding: 10px 14px;
-border-radius: 20px;
-max-width: 70%;
-word-break: break-word;
-display: inline-block;
+#memoSendBtn {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: #D32F2F;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
-
-/* AIメッセージ用の親コンテナ */
-.chat-ai-wrapper {
-display: flex;
-align-items: flex-start;
-gap: 8px;
-margin-bottom: 12px;
+#memoFeed {
+    padding-bottom: 80px;
 }
-
-/* AIアイコン */
-.chat-ai-wrapper .icon-img {
-width: 32px;
-height: 32px;
-border-radius: 50%;
-object-fit: cover;
+.memo-item {
+    padding: 12px 14px;
+    border-bottom: 1px solid #2e2e2e;
 }
-
-
-/* ユーザー側メッセージ（右寄せ） */
-.chat-user {
-align-self: flex-end;
-background-color: #007aff; /* 青 */
-color: #fff;
-border-radius: 20px 20px 0 20px; /* 右上丸め */
-margin-left: auto;
-margin-right: 10px;
+.memo-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
 }
-
-/* AI側メッセージ（左寄せ） */
-.chat-ai {
-align-self: flex-start;
-background-color: #333; /* ダークグレー */
-color: #fff;
-border-radius: 20px 20px 20px 0; /* 左上丸め */
-margin-right: auto;
-margin-left: 10px;
+.memo-author {
+    font-size: 13px;
+    font-weight: bold;
+    color: #e0e0e0;
 }
-
-/* スクロールを最新に自動で追従（JSでscrollTop制御） */
-#ai-chat-area {
-overflow-y: auto;
-display: flex;
-flex-direction: column;
-gap: 10px;
-padding: 12px;
-padding-bottom: calc(5rem + 60px);
-scroll-behavior: smooth;
+.memo-date {
+    font-size: 11px;
+    color: #666;
+}
+.memo-delete-btn {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: #555;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 2px 6px;
+}
+.memo-text {
+    font-size: 14px;
+    color: #ccc;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.memo-empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: #555;
+    font-size: 14px;
 }
 
 

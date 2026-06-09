@@ -101,21 +101,38 @@
     </div>
 </div>
 
-<!-- ===== AIチャット画面 ===== -->
+<!-- ===== ししまるタブ ===== -->
 <div class="tab-content" id="chat">
     <div class="nav-title">
         <h1>ししまる</h1>
+        <button class="reload-btn" title="更新"><i class="fas fa-sync-alt"></i></button>
     </div>
-
     <div class="contents">
-        <div id="ai-chat-area">
+        <div class="shishi-tabs">
+            <button class="shishi-tab-btn active" data-shishi-tab="stats">参加率</button>
+            <button class="shishi-tab-btn" data-shishi-tab="memo">気づきメモ</button>
         </div>
 
-        <div class="chat-input-area">
-            <input type="text" id="chat-input" placeholder="メッセージを入力">
-            <button id="chat-send-btn">送信</button>
+        <!-- 参加率タブ -->
+        <div class="shishi-tab-content active" id="shishiStatsTab">
+            <div class="stats-filter">
+                <button class="stats-filter-btn active" data-filter="event">イベント</button>
+                <button class="stats-filter-btn" data-filter="practice">練習</button>
+            </div>
+            <div id="statsArea"></div>
+        </div>
+
+        <!-- 気づきメモタブ -->
+        <div class="shishi-tab-content" id="shishiMemoTab">
+            <div id="memoFeed"></div>
         </div>
     </div>
+</div>
+
+<!-- メモ入力エリア（メモタブ表示時のみ） -->
+<div class="memo-input-area" id="memoInputArea" style="display:none;">
+    <textarea id="memoInput" placeholder="気づきを入力…" rows="2"></textarea>
+    <button id="memoSendBtn"><i class="fas fa-paper-plane"></i></button>
 </div>
 
 <!-- ==== カレンダー画面 ==== -->

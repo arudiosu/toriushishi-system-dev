@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // UI は先に使えるようにする
     initBottomNav();
     initEventDelegation();
-    initChatBot();
+    initShishimaru();
 
 
     // スケルトン表示
@@ -1059,90 +1059,134 @@ async function fillPracticeDetailCard(practiceData, userId, card) {
 }
 
 /* =======================================================
-チャットボット
+ししまるタブ（参加率・気づきメモ）
 ======================================================= */
-function initChatBot() {
-    const input = document.getElementById("chat-input");
-    const sendBtn = document.getElementById("chat-send-btn");
-    const area = document.getElementById("ai-chat-area");
-    if(!input || !sendBtn || !area) return;
+let currentStatsFilter = "event";
 
-    sendBtn.addEventListener("click", sendChat);
-    input.addEventListener("keypress", (e) => { if(e.key === "Enter") sendChat(); });
+function initShishimaru() {
+    // タブ切り替え
+    document.querySelectorAll(".shishi-tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            document.querySelectorAll(".shishi-tab-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            const tab = btn.dataset.shishiTab;
+            document.querySelectorAll(".shishi-tab-content").forEach(c => c.classList.remove("active"));
+            document.getElementById("shishi" + tab.charAt(0).toUpperCase() + tab.slice(1) + "Tab")?.classList.add("active");
 
-    async function sendChat() {
-        const text = input.value.trim();
-        if(!text) return;
-        appendChatMessage(text, "user");
-        input.value = "";
+            const memoInputArea = document.getElementById("memoInputArea");
+            if (memoInputArea) memoInputArea.style.display = tab === "memo" ? "flex" : "none";
 
-        const typingWrapper = createTypingIndicator();
-        area.appendChild(typingWrapper);
-        area.scrollTop = area.scrollHeight;
+            if (tab === "stats") loadParticipationStats();
+            if (tab === "memo") loadMemos();
+        });
+    });
 
-    try {
-        const data = await callGasApi({ action: "chatAI", text: text });
-        typingWrapper.remove();
+    // 参加率フィルター
+    document.querySelectorAll(".stats-filter-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            document.querySelectorAll(".stats-filter-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            currentStatsFilter = btn.dataset.filter;
+            loadParticipationStats();
+        });
+    });
 
-        // エラー（success:false）
-        if (!data.success) {
-            appendChatMessage(
-                data.message || "AIサービスでエラーが発生しました。",
-                "ai"
-            );
-            return;
-        }
+    // メモ送信
+    document.getElementById("memoSendBtn")?.addEventListener("click", sendMemo);
+    document.getElementById("memoInput")?.addEventListener("keydown", e => {
+        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMemo(); }
+    });
 
-        // 成功
-        appendChatMessage(data.reply, "ai");
+    // 初期ロード（参加率タブ）
+    loadParticipationStats();
+}
 
-    } catch (e) {
-        typingWrapper.remove();
-        appendChatMessage("通信エラーが発生しました。", "ai");
+// ===== 参加率 =====
+async function loadParticipationStats() {
+    const area = document.getElementById("statsArea");
+    if (!area) return;
+    area.innerHTML = '<div class="stats-empty">読み込み中…</div>';
+    const res = await callGasApi({ action: "getParticipationStats", filter: currentStatsFilter });
+    if (!res?.success || !res.stats?.length) {
+        area.innerHTML = '<div class="stats-empty">データなし</div>';
+        return;
     }
+    area.innerHTML = "";
+    res.stats.forEach((s, i) => {
+        const pct = Math.round(s.rate * 100);
+        const div = document.createElement("div");
+        div.className = "stat-item";
+        div.innerHTML = `
+            <span class="stat-rank">${i + 1}</span>
+            <span class="stat-name">${s.name}</span>
+            <div class="stat-bar-wrap"><div class="stat-bar" style="width:0%"></div></div>
+            <span class="stat-pct">${pct}%</span>
+            <span class="stat-count">${s.participated}/${s.total}</span>
+        `;
+        area.appendChild(div);
+        // アニメーション
+        requestAnimationFrame(() => {
+            div.querySelector(".stat-bar").style.width = pct + "%";
+        });
+    });
+}
 
+// ===== 気づきメモ =====
+async function loadMemos() {
+    const feed = document.getElementById("memoFeed");
+    if (!feed) return;
+    feed.innerHTML = '<div class="memo-empty">読み込み中…</div>';
+    const res = await callGasApi({ action: "getMemos" });
+    if (!res?.success) { feed.innerHTML = '<div class="memo-empty">取得失敗</div>'; return; }
+    renderMemos(res.memos || []);
+}
+
+function renderMemos(memos) {
+    const feed = document.getElementById("memoFeed");
+    if (!feed) return;
+    if (!memos.length) { feed.innerHTML = '<div class="memo-empty">まだメモがありません</div>'; return; }
+    feed.innerHTML = "";
+    memos.forEach(m => feed.appendChild(buildMemoItem(m)));
+}
+
+function buildMemoItem(m) {
+    const div = document.createElement("div");
+    div.className = "memo-item";
+    div.dataset.memoId = m.memo_id;
+    const canDelete = (m.user_id == userId) || userRole === "admin";
+    div.innerHTML = `
+        <div class="memo-header">
+            <span class="memo-author">${m.user_name || "名無し"}</span>
+            <span class="memo-date">${m.date || ""}</span>
+            ${canDelete ? `<button class="memo-delete-btn" data-memo-id="${m.memo_id}">削除</button>` : ""}
+        </div>
+        <div class="memo-text">${escHtml(m.text || "")}</div>
+    `;
+    if (canDelete) {
+        div.querySelector(".memo-delete-btn").addEventListener("click", () => deleteMemo(m.memo_id));
     }
+    return div;
+}
 
-    function createTypingIndicator() {
-        const wrapper = document.createElement("div");
-        wrapper.className = "chat-ai-wrapper";
+async function sendMemo() {
+    const input = document.getElementById("memoInput");
+    const text = input?.value.trim();
+    if (!text) return;
+    input.value = "";
+    const res = await callGasApi({ action: "saveMemo", text, userId });
+    if (res?.success) loadMemos();
+    else { alert("投稿に失敗しました"); input.value = text; }
+}
 
-        const icon = `<img class="icon-img" src="images/鳥生獅子連_ししまる.PNG">`;
+async function deleteMemo(memoId) {
+    if (!confirm("削除しますか？")) return;
+    const res = await callGasApi({ action: "deleteMemo", memoId, userId });
+    if (res?.success) loadMemos();
+    else alert("削除に失敗しました");
+}
 
-        const msg = document.createElement("div");
-        msg.className = "chat-msg chat-ai";
-        msg.textContent = "入力中";
-
-        wrapper.innerHTML = icon;
-        wrapper.appendChild(msg);
-
-        let dotCount = 0;
-        const intervalId = setInterval(() => {
-            dotCount = (dotCount + 1) % 4;
-            msg.textContent = "入力中" + ".".repeat(dotCount);
-        }, 400);
-
-        const originalRemove = wrapper.remove;
-        wrapper.remove = function () {
-            clearInterval(intervalId);
-            originalRemove.call(this);
-        };
-
-        return wrapper;
-    }
-
-    function appendChatMessage(text, sender) {
-        const msgDiv = document.createElement("div");
-        if(sender === "ai") {
-            msgDiv.className = "chat-ai-wrapper";
-            msgDiv.innerHTML = `<img class="icon-img" src="images/鳥生獅子連_ししまる.PNG"><div class="chat-msg chat-ai">${text}</div>`;
-        } else {
-            msgDiv.className = "chat-msg chat-user";
-            msgDiv.textContent = text;
-        }
-        area.appendChild(msgDiv);
-        area.scrollTop = area.scrollHeight;
-    }
+function escHtml(str) {
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 
