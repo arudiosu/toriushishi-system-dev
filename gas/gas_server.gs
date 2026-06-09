@@ -170,12 +170,12 @@ function doPost(e) {
         result = getGearSpareGAS();
         break;
 
-      case "addGearSpare":
-        result = addGearSpareGAS(data.item_type, data.value, data.memo, data.userId);
+      case "upsertGearSpare":
+        result = upsertGearSpareGAS(data.item_type, data.value, data.quantity, data.userId);
         break;
 
-      case "deleteGearSpare":
-        result = deleteGearSpareGAS(data.spare_id, data.userId);
+      case "getMyPage":
+        result = getMyPageGAS(data.userId);
         break;
 
       default:

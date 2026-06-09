@@ -20,7 +20,6 @@
   transition: var(--transition);
 }
 .gear-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
-
 .gear-tab-pane { display: none; }
 .gear-tab-pane.active { display: block; }
 
@@ -56,41 +55,58 @@
   border-radius: 99px;
   padding: 3px 10px;
 }
-.gear-tag-memo {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-3);
-}
+.gear-tag-memo { background: transparent; border: 1px solid var(--border); color: var(--text-3); }
 
 /* 未配布在庫 */
-.gear-spare-group { margin-bottom: 16px; }
+.gear-spare-group { margin-bottom: 20px; }
 .gear-spare-type-label {
   font-size: .78rem;
   font-weight: 700;
   color: var(--text-3);
   text-transform: uppercase;
   letter-spacing: .06em;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
+.gear-spare-empty { font-size: .85rem; color: var(--text-3); padding: 4px 0; margin: 0; }
 .gear-spare-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: 10px;
+  padding: 9px 12px;
   background: var(--surface-2);
   border-radius: var(--radius-sm);
   margin-bottom: 6px;
 }
 .gear-spare-value { font-weight: 600; color: var(--text-1); min-width: 60px; }
-.gear-spare-memo { font-size: .82rem; color: var(--text-3); flex: 1; }
-.gear-spare-del-btn {
-  background: none;
-  border: none;
-  color: var(--text-3);
-  cursor: pointer;
-  padding: 4px 6px;
-  font-size: .85rem;
+.gear-spare-qty-badge {
+  font-size: .82rem;
+  color: var(--text-2);
+  flex: 1;
+}
+.gear-spare-inline-edit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin-left: auto;
+}
+.gear-spare-qty-display {
+  min-width: 24px;
+  text-align: center;
+  font-weight: 700;
+  font-size: .95rem;
+  color: var(--text-1);
+}
+
+/* ＋／－ボタン共通 */
+.gear-qty-btn {
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  color: var(--text-1);
+  border-radius: var(--radius-sm);
+  width: 28px; height: 28px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
 
@@ -104,8 +120,14 @@
   border-radius: var(--radius-md);
   margin-top: 8px;
 }
+.gear-spare-add-title {
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--text-3);
+}
 .gear-spare-add-form select,
-.gear-spare-add-form input[type="text"] {
+.gear-spare-add-form input[type="text"],
+.gear-spare-add-form input[type="number"] {
   background: var(--surface-3);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -115,7 +137,14 @@
   width: 100%;
   box-sizing: border-box;
 }
-.gear-spare-add-form button {
+.gear-spare-qty-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.gear-spare-qty-row label { font-size: .85rem; color: var(--text-2); flex-shrink: 0; }
+.gear-spare-qty-row input[type="number"] { width: 64px; text-align: center; }
+.gear-spare-add-form button#gSpareUpsertBtn {
   background: var(--accent);
   color: #fff;
   border: none;
@@ -129,9 +158,7 @@
 /* 編集フォーム */
 .gear-edit-body {
   padding: 8px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: flex; flex-direction: column; gap: 12px;
 }
 .gear-edit-section { display: flex; flex-direction: column; gap: 4px; }
 .gear-field-label { font-size: .85rem; color: var(--text-2); }

@@ -3,7 +3,7 @@
 // =======================================================
 
 const GEAR_FIELDS = ["happi_no", "tshirt_size", "tekkou", "hakama", "kimono_top", "kimono_bottom", "memo"];
-const GEAR_LABELS = { happi_no: "法被", tshirt_size: "T", tekkou: "手甲", hakama: "はかま", kimono_top: "着物上", kimono_bottom: "着物下", memo: "" };
+const GEAR_LABELS = { happi_no: "法被", tshirt_size: "T", tekkou: "手甲", hakama: "はかま", kimono_top: "着物上", kimono_bottom: "着物下" };
 
 let gearData = [];
 let spareData = [];
@@ -24,8 +24,7 @@ function initGearTabs() {
             document.querySelectorAll(".gear-tab-pane").forEach(p => p.classList.remove("active"));
             btn.classList.add("active");
             currentGearTab = btn.dataset.gearTab;
-            const paneId = currentGearTab === "members" ? "gearMembersPane" : "gearSparePane";
-            document.getElementById(paneId).classList.add("active");
+            document.getElementById(currentGearTab === "members" ? "gearMembersPane" : "gearSparePane").classList.add("active");
             if (currentGearTab === "spare") loadGearSpare();
         });
     });
@@ -38,10 +37,7 @@ async function loadGear() {
     overlay.style.display = "flex";
     const res = await callGasApi({ action: "getGear" });
     overlay.style.display = "none";
-    if (!res?.success) {
-        document.getElementById("gearList").innerHTML = '<p style="padding:16px;color:var(--text-3);">取得失敗</p>';
-        return;
-    }
+    if (!res?.success) { document.getElementById("gearList").innerHTML = '<p style="padding:16px;color:var(--text-3);">取得失敗</p>'; return; }
     gearData = res.members || [];
     renderGearList();
 }
@@ -52,12 +48,13 @@ function renderGearList() {
     list.innerHTML = "";
     gearData.forEach(m => {
         const g = m.gear || {};
+        const isAdmin = typeof userRole !== "undefined" && userRole === "admin";
+        const tags = Object.entries(GEAR_LABELS)
+            .filter(([f]) => g[f] !== "" && g[f] !== undefined)
+            .map(([f, label]) => `<span class="gear-tag">${label}：${escHtml(String(g[f]))}</span>`).join("");
+        const memoTag = g.memo ? `<span class="gear-tag gear-tag-memo">${escHtml(String(g.memo))}</span>` : "";
         const item = document.createElement("div");
         item.className = "gear-item";
-        const tags = GEAR_FIELDS.filter(f => f !== "memo" && g[f] !== "" && g[f] !== undefined)
-            .map(f => `<span class="gear-tag">${GEAR_LABELS[f]}：${escHtml(String(g[f]))}</span>`).join("");
-        const memoTag = g.memo ? `<span class="gear-tag gear-tag-memo">${escHtml(String(g.memo))}</span>` : "";
-        const isAdmin = typeof userRole !== "undefined" && userRole === "admin";
         item.innerHTML = `
             <div class="gear-item-header">
                 <span class="gear-member-name">${escHtml(m.name)}</span>
@@ -110,55 +107,85 @@ async function loadGearSpare() {
 
 function renderSpareList() {
     const list = document.getElementById("gearSpareList");
-    const types = ["法被", "Tシャツ", "手甲", "はかま", "着物上", "着物下"];
-    if (!spareData.length) { list.innerHTML = '<p style="padding:8px 0;color:var(--text-3);">在庫なし</p>'; return; }
+    const isAdmin = typeof userRole !== "undefined" && userRole === "admin";
+    const types = ["Tシャツ", "手甲"];
     list.innerHTML = "";
+
     types.forEach(type => {
-        const items = spareData.filter(s => s.item_type === type);
-        if (!items.length) return;
+        const items = spareData.filter(s => s.item_type === type).sort((a, b) => String(a.value).localeCompare(String(b.value)));
         const group = document.createElement("div");
         group.className = "gear-spare-group";
         group.innerHTML = `<div class="gear-spare-type-label">${escHtml(type)}</div>`;
-        items.forEach(s => {
-            const row = document.createElement("div");
-            row.className = "gear-spare-row";
-            const isAdmin = typeof userRole !== "undefined" && userRole === "admin";
-            row.innerHTML = `
-                <span class="gear-spare-value">${escHtml(String(s.value))}</span>
-                ${s.memo ? `<span class="gear-spare-memo">${escHtml(String(s.memo))}</span>` : ""}
-                ${isAdmin ? `<button class="gear-spare-del-btn" aria-label="削除"><i class="fas fa-trash"></i></button>` : ""}
-            `;
-            if (isAdmin) row.querySelector(".gear-spare-del-btn").addEventListener("click", () => deleteSpare(s.spare_id));
-            group.appendChild(row);
-        });
+
+        if (!items.length) {
+            group.innerHTML += `<p class="gear-spare-empty">在庫なし</p>`;
+        } else {
+            items.forEach(s => {
+                const row = document.createElement("div");
+                row.className = "gear-spare-row";
+                row.innerHTML = `
+                    <span class="gear-spare-value">${escHtml(String(s.value))}</span>
+                    <span class="gear-spare-qty-badge">${s.quantity}個</span>
+                    ${isAdmin ? `
+                        <div class="gear-spare-inline-edit">
+                            <button class="gear-qty-btn gear-qty-inline-minus">－</button>
+                            <span class="gear-spare-qty-display">${s.quantity}</span>
+                            <button class="gear-qty-btn gear-qty-inline-plus">＋</button>
+                        </div>` : ""}
+                `;
+                if (isAdmin) {
+                    let qty = s.quantity;
+                    const display = row.querySelector(".gear-spare-qty-display");
+                    row.querySelector(".gear-qty-inline-minus").addEventListener("click", async () => {
+                        if (qty <= 0) return;
+                        qty--;
+                        display.textContent = qty;
+                        await upsertSpare(type, s.value, qty);
+                        await loadGearSpare();
+                    });
+                    row.querySelector(".gear-qty-inline-plus").addEventListener("click", async () => {
+                        qty++;
+                        display.textContent = qty;
+                        await upsertSpare(type, s.value, qty);
+                        await loadGearSpare();
+                    });
+                }
+                group.appendChild(row);
+            });
+        }
         list.appendChild(group);
     });
+}
+
+async function upsertSpare(item_type, value, quantity) {
+    await callGasApi({ action: "upsertGearSpare", item_type, value, quantity, userId });
 }
 
 async function addSpare() {
     const type = document.getElementById("gSpareType").value;
     const value = document.getElementById("gSpareValue").value.trim();
-    const memo = document.getElementById("gSpareMemo").value.trim();
-    if (!value) { alert("番号・サイズを入力してください"); return; }
-    const btn = document.getElementById("gSpareAddBtn");
+    const qty = parseInt(document.getElementById("gSpareQty").value) || 0;
+    if (!value) { alert("サイズ・コードを入力してください"); return; }
+    const btn = document.getElementById("gSpareUpsertBtn");
     btn.disabled = true;
-    const res = await callGasApi({ action: "addGearSpare", item_type: type, value, memo, userId });
+    const res = await callGasApi({ action: "upsertGearSpare", item_type: type, value, quantity: qty, userId });
     btn.disabled = false;
-    if (!res?.success) { alert(res?.msg || "追加失敗"); return; }
+    if (!res?.success) { alert(res?.msg || "保存失敗"); return; }
     document.getElementById("gSpareValue").value = "";
-    document.getElementById("gSpareMemo").value = "";
-    await loadGearSpare();
-}
-
-async function deleteSpare(spare_id) {
-    if (!confirm("削除しますか？")) return;
-    const res = await callGasApi({ action: "deleteGearSpare", spare_id, userId });
-    if (!res?.success) { alert(res?.msg || "削除失敗"); return; }
+    document.getElementById("gSpareQty").value = "1";
     await loadGearSpare();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     initGearTabs();
     document.getElementById("gearSaveBtn")?.addEventListener("click", saveGear);
-    document.getElementById("gSpareAddBtn")?.addEventListener("click", addSpare);
+    document.getElementById("gSpareUpsertBtn")?.addEventListener("click", addSpare);
+    document.getElementById("gSpareQtyMinus")?.addEventListener("click", () => {
+        const el = document.getElementById("gSpareQty");
+        el.value = Math.max(0, parseInt(el.value || 0) - 1);
+    });
+    document.getElementById("gSpareQtyPlus")?.addEventListener("click", () => {
+        const el = document.getElementById("gSpareQty");
+        el.value = parseInt(el.value || 0) + 1;
+    });
 });

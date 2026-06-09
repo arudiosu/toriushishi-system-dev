@@ -394,6 +394,7 @@ function initEventDelegation() {
                 case "otabi-bulk-entry":   document.getElementById("otabiBulkEntryCard")?.classList.remove("active"); break;
                 case "gear-management":    document.getElementById("gearCard")?.classList.remove("active"); break;
                 case "gear-edit":          document.getElementById("gearEditCard")?.classList.remove("active"); break;
+                case "mypage":             document.getElementById("myPageCard")?.classList.remove("active"); break;
             }
             return;
         }
@@ -417,6 +418,7 @@ document.querySelectorAll(".tab-item").forEach(tab => {
         if (targetTab === "practice-management") { if (userRole === "user") { alert("管理者のみアクセスできます。"); return; } openPracticeCreateForm(); return; }
         if (targetTab === "otabi-management") { if (userRole === "user") { alert("管理者のみアクセスできます。"); return; } openOtabiCard(); return; }
         if (targetTab === "gear-management") { openGearCard(); return; }
+        if (targetTab === "mypage") { openMyPage(); return; }
     });
 });
 
