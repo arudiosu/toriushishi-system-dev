@@ -113,18 +113,40 @@ async function deletePlaceForm() {
 
 // ===== スケジュール =====
 
-async function loadOtabiSchedule() {
+// キー: "year_group_day" → entries[]
+const otabiSchedCache = {};
+let otabiSchedCachedYear = null;
+
+async function loadOtabiSchedule(forceReload = false) {
     document.getElementById("otabiScheduleYear").textContent = otabiYear;
     document.querySelectorAll(".otabi-group-btn").forEach(b => b.classList.toggle("active", b.dataset.group === otabiGroup));
     document.querySelectorAll(".otabi-day-btn").forEach(b => b.classList.toggle("active", b.dataset.day === otabiDay));
-    const list = document.getElementById("otabiScheduleList");
-    list.innerHTML = [1,2,3].map(() => '<div class="skeleton skeleton-card"></div>').join('');
-    const fetches = [callGasApi({ action: "getOtabiSchedule", year: otabiYear, group: otabiGroup, day: otabiDay })];
-    if (!otabiPlaces.length) fetches.push(callGasApi({ action: "getOtabiPlaces" }));
-    const [schedRes, placesRes] = await Promise.all(fetches);
-    otabiScheduleEntries = schedRes.entries || [];
-    if (placesRes) otabiPlaces = placesRes.places || [];
+
+    const cacheKey = `${otabiYear}_${otabiGroup}_${otabiDay}`;
+    const yearChanged = otabiSchedCachedYear !== otabiYear;
+
+    if (forceReload || yearChanged || !otabiSchedCache[cacheKey]) {
+        const list = document.getElementById("otabiScheduleList");
+        list.innerHTML = [1,2,3].map(() => '<div class="skeleton skeleton-card"></div>').join('');
+        if (yearChanged) {
+            // 年変更時はキャッシュ全クリア
+            Object.keys(otabiSchedCache).forEach(k => delete otabiSchedCache[k]);
+            otabiSchedCachedYear = otabiYear;
+        }
+        const fetches = [callGasApi({ action: "getOtabiSchedule", year: otabiYear, group: otabiGroup, day: otabiDay })];
+        if (!otabiPlaces.length) fetches.push(callGasApi({ action: "getOtabiPlaces" }));
+        const [schedRes, placesRes] = await Promise.all(fetches);
+        otabiSchedCache[cacheKey] = schedRes.entries || [];
+        if (placesRes) otabiPlaces = placesRes.places || [];
+    }
+
+    otabiScheduleEntries = otabiSchedCache[cacheKey];
     renderOtabiSchedule();
+}
+
+function invalidateSchedCache() {
+    Object.keys(otabiSchedCache).forEach(k => delete otabiSchedCache[k]);
+    otabiSchedCachedYear = null;
 }
 
 function renderOtabiSchedule() {
@@ -206,7 +228,7 @@ async function saveEntryForm() {
         const res = await callGasApi({ action: "saveOtabiEntry", entry });
         if (!res.success) throw new Error("保存失敗");
         document.getElementById("otabiEntryFormCard").classList.remove("active");
-        await loadOtabiSchedule();
+        invalidateSchedCache(); await loadOtabiSchedule();
     } catch(e) { alert("保存中にエラーが発生しました"); }
     finally { loadingOverlay.style.display = "none"; }
 }
@@ -218,7 +240,7 @@ async function deleteEntryForm() {
     try {
         await callGasApi({ action: "deleteOtabiEntry", entryId: Number(id) });
         document.getElementById("otabiEntryFormCard").classList.remove("active");
-        await loadOtabiSchedule();
+        invalidateSchedCache(); await loadOtabiSchedule();
     } finally { loadingOverlay.style.display = "none"; }
 }
 
@@ -294,7 +316,7 @@ async function saveBulkEntries() {
     try {
         await Promise.all(entries.map(entry => callGasApi({ action: "saveOtabiEntry", entry })));
         document.getElementById("otabiBulkEntryCard").classList.remove("active");
-        await loadOtabiSchedule();
+        invalidateSchedCache(); await loadOtabiSchedule();
     } catch(e) { alert("保存中にエラーが発生しました"); }
     finally { loadingOverlay.style.display = "none"; }
 }
@@ -307,7 +329,7 @@ async function copyOtabiSchedule() {
         const res = await callGasApi({ action: "copyOtabiSchedule", fromYear, toYear: otabiYear, group: otabiGroup });
         if (!res.success) return alert(res.msg || "コピー失敗");
         alert(`${res.count}件コピーしました`);
-        await loadOtabiSchedule();
+        invalidateSchedCache(); await loadOtabiSchedule();
     } finally { loadingOverlay.style.display = "none"; }
 }
 
@@ -334,19 +356,27 @@ async function shareOtabiSchedule() {
 
 // ===== お花代（Excel風一括入力） =====
 
-let otabiDonEntries = [];      // 表示中グループ＋曜日のエントリ
+let otabiDonEntries = [];   // 現在表示中（グループ＋曜日でフィルタ済み）
+let otabiDonAllCache = [];  // その年の全エントリキャッシュ
+let otabiDonCachedYear = null;
 
-async function loadOtabiDonations() {
+async function loadOtabiDonations(forceReload = false) {
     document.getElementById("otabiDonYear").textContent = otabiYear;
     document.querySelectorAll(".otabi-don-group-btn").forEach(b =>
         b.classList.toggle("active", b.dataset.group === otabiDonGroup));
     document.querySelectorAll(".otabi-don-day-btn").forEach(b =>
         b.classList.toggle("active", b.dataset.day === otabiDonDay));
-    const grid = document.getElementById("otabiDonationGrid");
-    grid.innerHTML = '<div class="skeleton skeleton-card"></div>';
-    const res = await callGasApi({ action: "getOtabiDonations", year: otabiYear });
-    const all = (res.success && res.entries) ? res.entries : [];
-    otabiDonEntries = all.filter(e => e.group === otabiDonGroup && e.day === otabiDonDay);
+
+    // 年が変わった場合・強制リロード時のみAPIコール
+    if (forceReload || otabiDonCachedYear !== otabiYear) {
+        const grid = document.getElementById("otabiDonationGrid");
+        grid.innerHTML = '<div class="skeleton skeleton-card"></div>';
+        const res = await callGasApi({ action: "getOtabiDonations", year: otabiYear });
+        otabiDonAllCache = (res.success && res.entries) ? res.entries : [];
+        otabiDonCachedYear = otabiYear;
+    }
+
+    otabiDonEntries = otabiDonAllCache.filter(e => e.group === otabiDonGroup && e.day === otabiDonDay);
     renderOtabiDonations();
 }
 
@@ -410,6 +440,11 @@ async function saveOtabiDonations() {
     try {
         const res = await callGasApi({ action: "saveOtabiDonations", donations });
         if (!res.success) throw new Error();
+        // キャッシュ内の該当エントリの金額を更新
+        donations.forEach(d => {
+            const cached = otabiDonAllCache.find(e => e.entry_id == d.entry_id);
+            if (cached) cached.donation = d.donation;
+        });
         btn.textContent = "保存しました ✓";
         setTimeout(() => { btn.textContent = "お花代を保存"; btn.disabled = false; }, 1500);
     } catch (e) {
