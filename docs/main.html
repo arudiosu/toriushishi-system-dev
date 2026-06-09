@@ -6,6 +6,7 @@
 <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css">
 <link rel="stylesheet" href="css/otabi.css">
+<link rel="stylesheet" href="css/gear.css">
 <style>
 .practice-mode-toggle { margin: 8px 0; }
 .weekday-select { margin-top: 8px; }
@@ -281,6 +282,7 @@
                     <li class="tab-item" data-target="event-management">イベント管理</li>
                     <li class="tab-item" data-target="practice-management">練習日管理</li>
                     <li class="tab-item" data-target="otabi-management">お旅管理</li>
+                    <li class="tab-item" data-target="gear-management">装備管理</li>
                 </ul>
             </section>
         </div>
@@ -575,10 +577,74 @@
         <button class="save-event-btn" id="saveBulkEntriesBtn" style="margin: 4px 16px 8px;">一括保存</button>
     </div>
 
+    <!-- 装備管理カード -->
+    <div class="member-card" id="gearCard">
+        <div class="loading-overlay" style="display:none;">
+            <img src="images/鳥生獅子連_詳細ローディング.gif" alt="読み込み中…" />
+        </div>
+        <button class="close-card-btn" data-target="gear-management">戻る</button>
+        <h2>装備管理</h2>
+        <div id="gearList"></div>
+    </div>
+
+    <!-- 装備編集カード（管理者） -->
+    <div class="member-card" id="gearEditCard">
+        <button class="close-card-btn" data-target="gear-edit">戻る</button>
+        <h2 id="gearEditTitle">装備編集</h2>
+        <div class="gear-edit-body">
+            <div class="gear-edit-section">
+                <div class="gear-section-label">担当楽器</div>
+                <div class="gear-checks">
+                    <label class="gear-check-label"><input type="checkbox" id="gEdit_odaiko"> 大太鼓</label>
+                    <label class="gear-check-label"><input type="checkbox" id="gEdit_kotaiko"> 小太鼓</label>
+                    <label class="gear-check-label"><input type="checkbox" id="gEdit_shishi"> 獅子</label>
+                </div>
+            </div>
+            <div class="gear-edit-section">
+                <label class="gear-field-label">芸</label>
+                <input type="text" id="gEdit_art" placeholder="例：三繰①">
+            </div>
+            <div class="gear-edit-section">
+                <label class="gear-field-label">法被番号</label>
+                <input type="text" id="gEdit_happi_no" placeholder="例：10">
+            </div>
+            <div class="gear-edit-section">
+                <label class="gear-field-label">はっぴ R8</label>
+                <input type="text" id="gEdit_happi_r8" placeholder="例：9">
+            </div>
+            <div class="gear-edit-section">
+                <label class="gear-field-label">Tシャツサイズ</label>
+                <input type="text" id="gEdit_tshirt_size" placeholder="例：L">
+            </div>
+            <div class="gear-edit-section">
+                <label class="gear-field-label">手甲</label>
+                <input type="text" id="gEdit_tekkou" placeholder="例：M21">
+            </div>
+            <div class="gear-edit-section">
+                <label class="gear-field-label">はかま</label>
+                <input type="text" id="gEdit_hakama" placeholder="">
+            </div>
+            <div class="gear-edit-section">
+                <label class="gear-field-label">着物（上）</label>
+                <input type="text" id="gEdit_kimono_top" placeholder="">
+            </div>
+            <div class="gear-edit-section">
+                <label class="gear-field-label">着物（下）</label>
+                <input type="text" id="gEdit_kimono_bottom" placeholder="">
+            </div>
+            <div class="gear-edit-section">
+                <label class="gear-field-label">メモ</label>
+                <input type="text" id="gEdit_memo" placeholder="">
+            </div>
+        </div>
+        <button class="save-event-btn" id="gearSaveBtn" style="margin:8px 16px;">保存</button>
+    </div>
+
 </div>
 
 <script src="js/config.js"></script>
 <script src="js/main.js"></script>
 <script src="js/otabi.js"></script>
+<script src="js/gear.js"></script>
 </body>
 </html>

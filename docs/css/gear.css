@@ -1,0 +1,106 @@
+/* =======================================================
+   装備管理
+======================================================= */
+.gear-item {
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+.gear-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.gear-member-name {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-1);
+}
+.gear-edit-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  border-radius: var(--radius-sm);
+  width: 32px; height: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.gear-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.gear-tag {
+  font-size: .78rem;
+  background: var(--surface-3);
+  color: var(--text-2);
+  border-radius: 99px;
+  padding: 3px 10px;
+}
+.gear-tag-role {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+.gear-tag-memo {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-3);
+}
+
+/* 編集フォーム */
+.gear-edit-body {
+  padding: 8px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.gear-edit-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.gear-section-label {
+  font-size: .8rem;
+  color: var(--text-3);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.gear-field-label {
+  font-size: .85rem;
+  color: var(--text-2);
+}
+.gear-edit-body input[type="text"] {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-1);
+  padding: 8px 12px;
+  font-size: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.gear-checks {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.gear-check-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .9rem;
+  color: var(--text-1);
+  cursor: pointer;
+}
+.gear-check-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}

@@ -158,6 +158,14 @@ function doPost(e) {
         result = deleteMemoGAS(data.memoId, data.userId);
         break;
 
+      case "getGear":
+        result = getGearGAS();
+        break;
+
+      case "saveGear":
+        result = saveGearGAS(data.targetUserId, data.gear, data.userId);
+        break;
+
       default:
         result = { success: false, msg: "unknown action" };
     }
