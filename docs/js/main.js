@@ -423,9 +423,14 @@ async function loadMembersUser() {
     const list = document.getElementById("memberListUser");
     const overlay = card.querySelector(".loading-overlay");
     overlay.style.display = "flex";
-    const res = await callGasApi({ action: "getMembers", role: "user" });
+    const [res, gearRes] = await Promise.all([
+        callGasApi({ action: "getMembers", role: "user" }),
+        callGasApi({ action: "getGear" })
+    ]);
+    const gearMap = {};
+    (gearRes?.members || []).forEach(m => { gearMap[m.userId] = m.gear || {}; });
     list.innerHTML = "";
-    res.members.filter(m => m.status === "active").forEach(m => list.appendChild(buildMemberItemUser(m)));
+    res.members.filter(m => m.status === "active").forEach(m => list.appendChild(buildMemberItemUser(m, gearMap[m.userId])));
     overlay.style.display = "none";
 }
 async function loadMembersAdmin() {
@@ -447,10 +452,23 @@ async function loadMembersAdmin() {
         if (active.length) { list.appendChild(makeTitle("アクティブメンバー")); active.forEach(m => list.appendChild(buildMemberItemAdmin(m, false, gearMap[m.userId]))); }
     } finally { overlay.style.display = "none"; }
 }
-function buildMemberItemUser(member) {
+function buildMemberItemUser(member, gear) {
     const li = document.createElement("li"); li.classList.add("member-item");
     if (member.position) { const p = document.createElement("span"); p.classList.add("member-position"); p.textContent = member.position; li.appendChild(p); }
     const n = document.createElement("span"); n.classList.add("member-name"); n.textContent = member.name; li.appendChild(n);
+    if (gear) {
+        const LABELS = { happi_no: "法被", tshirt_size: "T", tekkou: "手甲", hakama: "はかま", kimono_top: "着物上", kimono_bottom: "着物下" };
+        const tags = Object.entries(LABELS)
+            .filter(([f]) => gear[f] !== "" && gear[f] !== undefined)
+            .map(([f, label]) => `<span class="gear-tag">${label}：${escHtml(String(gear[f]))}</span>`).join("");
+        const memoTag = gear.memo ? `<span class="gear-tag gear-tag-memo">${escHtml(String(gear.memo))}</span>` : "";
+        if (tags || memoTag) {
+            const div = document.createElement("div");
+            div.className = "gear-tags member-gear-tags";
+            div.innerHTML = tags + memoTag;
+            li.appendChild(div);
+        }
+    }
     appendChildren(li, member);
     return li;
 }
