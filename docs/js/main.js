@@ -209,19 +209,21 @@ function buildPerfItem(data = {}) {
             </div>
             <button class="perf-remove-btn" type="button">✕</button>
         </div>
-        <input type="text" class="perf-name" placeholder="演目名" value="${escQ(data.name || '')}" list="perfNameList">
-        <datalist id="perfNameList">
-            <option value="提婆">
-            <option value="狐">
-            <option value="ひょっとこ">
-            <option value="のみとり">
-            <option value="三継ぎ【頭】">
-            <option value="三継ぎ【扇子】">
-            <option value="四継ぎ">
-            <option value="練る">
-            <option value="三番叟">
-            <option value="宮出し">
-        </datalist>
+        <select class="perf-name-select">
+            <option value="">演目を選択</option>
+            <option value="提婆">提婆</option>
+            <option value="狐">狐</option>
+            <option value="ひょっとこ">ひょっとこ</option>
+            <option value="のみとり">のみとり</option>
+            <option value="三継ぎ【頭】">三継ぎ【頭】</option>
+            <option value="三継ぎ【扇子】">三継ぎ【扇子】</option>
+            <option value="四継ぎ">四継ぎ</option>
+            <option value="練る">練る</option>
+            <option value="三番叟">三番叟</option>
+            <option value="宮出し">宮出し</option>
+            <option value="__other__">その他（自由入力）</option>
+        </select>
+        <input type="text" class="perf-name" placeholder="演目名を入力" style="display:none;" value="${escQ(data.name || '')}">
         <div class="perf-drums">
             <input type="text" class="perf-taiko-dai" placeholder="大太鼓" value="${escQ(data.taikoDai || '')}">
             <input type="text" class="perf-taiko-ko" placeholder="小太鼓" value="${escQ(data.taikoKo || '')}">
@@ -231,6 +233,26 @@ function buildPerfItem(data = {}) {
     `;
     div.querySelector(".perf-remove-btn").addEventListener("click", () => div.remove());
     div.querySelector(".perf-add-role-btn").addEventListener("click", () => addRoleRow(div.querySelector(".perf-roles-list")));
+    const sel = div.querySelector(".perf-name-select");
+    const nameInput = div.querySelector(".perf-name");
+    const PERF_OPTIONS = ["提婆","狐","ひょっとこ","のみとり","三継ぎ【頭】","三継ぎ【扇子】","四継ぎ","練る","三番叟","宮出し"];
+    const initName = data.name || "";
+    if (PERF_OPTIONS.includes(initName)) {
+        sel.value = initName;
+        nameInput.style.display = "none";
+    } else if (initName) {
+        sel.value = "__other__";
+        nameInput.style.display = "";
+    }
+    sel.addEventListener("change", () => {
+        if (sel.value === "__other__") {
+            nameInput.style.display = "";
+            nameInput.focus();
+        } else {
+            nameInput.style.display = "none";
+            nameInput.value = "";
+        }
+    });
     const rolesList = div.querySelector(".perf-roles-list");
     if (data.roles && Array.isArray(data.roles)) {
         if (data.roles.length) data.roles.forEach(r => addRoleRow(rolesList, r));
@@ -264,7 +286,10 @@ function addRoleRow(container, data = {}) {
 function collectPerformances() {
     const performances = [];
     document.querySelectorAll("#performanceList .perf-item").forEach(item => {
-        const name = item.querySelector(".perf-name")?.value.trim();
+        const sel = item.querySelector(".perf-name-select");
+        const name = (sel?.value === "__other__" || sel?.value === "")
+            ? item.querySelector(".perf-name")?.value.trim()
+            : sel?.value.trim();
         if (!name) return;
         const roles = [];
         item.querySelectorAll(".perf-role-row").forEach(row => {
