@@ -78,6 +78,11 @@ function initBottomNav() {
                 const isMemoTabActive = document.querySelector(".shishi-tab-btn.active")?.dataset.shishiTab === "memo";
                 memoInputArea.style.display = (target === "chat" && isMemoTabActive) ? "flex" : "none";
             }
+            if (target === "chat") {
+                const activeShishiTab = document.querySelector(".shishi-tab-btn.active")?.dataset.shishiTab;
+                if (activeShishiTab === "memo") loadMemos();
+                else loadParticipationStats();
+            }
         });
     });
 }
@@ -733,8 +738,6 @@ function initShishimaru() {
         if (activeTab === "memo") loadMemos();
         else loadParticipationStats();
     });
-
-    loadParticipationStats();
 }
 
 async function loadParticipationStats() {

@@ -960,6 +960,8 @@ input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(.7); opac
 /* =======================================================
   ししまるタブ
 ======================================================= */
+#chat { top: 0; }
+
 /* バナー */
 .shishi-banner {
   display: flex;
