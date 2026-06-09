@@ -209,7 +209,19 @@ function buildPerfItem(data = {}) {
             </div>
             <button class="perf-remove-btn" type="button">✕</button>
         </div>
-        <input type="text" class="perf-name" placeholder="演目名（提蠹・狐・三継ぎなど）" value="${escQ(data.name || '')}">
+        <input type="text" class="perf-name" placeholder="演目名" value="${escQ(data.name || '')}" list="perfNameList">
+        <datalist id="perfNameList">
+            <option value="提婆">
+            <option value="狐">
+            <option value="ひょっとこ">
+            <option value="のみとり">
+            <option value="三継ぎ【頭】">
+            <option value="三継ぎ【扇子】">
+            <option value="四継ぎ">
+            <option value="練る">
+            <option value="三番叟">
+            <option value="宮出し">
+        </datalist>
         <div class="perf-drums">
             <input type="text" class="perf-taiko-dai" placeholder="大太鼓" value="${escQ(data.taikoDai || '')}">
             <input type="text" class="perf-taiko-ko" placeholder="小太鼓" value="${escQ(data.taikoKo || '')}">
