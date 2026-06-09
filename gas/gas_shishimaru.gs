@@ -12,14 +12,17 @@ function getParticipationStatsGAS(filter) {
   const uMap = {};
   userRows[0].forEach((h, i) => uMap[h] = i);
 
-  // アクティブメンバー全員（管理者も含む）、created_at付き
+  // アクティブメンバー全員（管理者も含む）、created_at付き（当日も含むよう時刻を00:00にリセット）
   const members = userRows.slice(1)
     .filter(r => r[uMap["status"]] === "active")
-    .map(r => ({
-      userId: r[uMap["userId"]],
-      name: r[uMap["storedName"]],
-      createdAt: r[uMap["created_at"]] ? new Date(r[uMap["created_at"]]) : null
-    }));
+    .map(r => {
+      let createdAt = null;
+      if (r[uMap["created_at"]]) {
+        const d = new Date(r[uMap["created_at"]]);
+        createdAt = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      }
+      return { userId: r[uMap["userId"]], name: r[uMap["storedName"]], createdAt };
+    });
 
   return filter === "practice"
     ? calcPracticeStats(ss, members)
@@ -39,7 +42,8 @@ function calcEventStats(ss, members) {
     .filter(r => r[0])
     .map(r => {
       const d = r[eH["date"]];
-      return { eventId: r[eH["eventId"]], date: d instanceof Date ? d : new Date(String(d).replace(/\//g, "-")) };
+      const raw = d instanceof Date ? d : new Date(String(d).replace(/\//g, "-"));
+      return { eventId: r[eH["eventId"]], date: new Date(raw.getFullYear(), raw.getMonth(), raw.getDate()) };
     });
 
   if (!allEvents.length) return { success: true, stats: [] };
@@ -83,7 +87,8 @@ function calcPracticeStats(ss, members) {
     .filter(r => r[0])
     .map(r => {
       const d = r[pH["date"]];
-      return { practiceId: r[pH["practiceId"]], date: d instanceof Date ? d : new Date(String(d).replace(/\//g, "-")) };
+      const raw = d instanceof Date ? d : new Date(String(d).replace(/\//g, "-"));
+      return { practiceId: r[pH["practiceId"]], date: new Date(raw.getFullYear(), raw.getMonth(), raw.getDate()) };
     });
 
   if (!allPractices.length) return { success: true, stats: [] };
