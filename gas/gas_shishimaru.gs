@@ -12,9 +12,9 @@ function getParticipationStatsGAS(filter) {
   const uMap = {};
   userRows[0].forEach((h, i) => uMap[h] = i);
 
-  // アクティブメンバーのみ（admin除く）
+  // アクティブメンバー全員（管理者も含む）
   const members = userRows.slice(1)
-    .filter(r => r[uMap["status"]] === "active" && r[uMap["role"]] !== "admin")
+    .filter(r => r[uMap["status"]] === "active")
     .map(r => ({ userId: r[uMap["userId"]], name: r[uMap["storedName"]] }));
 
   return filter === "practice"
@@ -23,17 +23,17 @@ function getParticipationStatsGAS(filter) {
 }
 
 function calcEventStats(ss, members) {
-  const sheet = ss.getSheetByName("answers-events");
-  if (!sheet) return { success: true, stats: [] };
+  // イベント総数はeventsシートから取得
+  const eventSheet = ss.getSheetByName("events");
+  const total = eventSheet
+    ? eventSheet.getDataRange().getValues().slice(1).filter(r => r[0]).length
+    : 0;
+  if (!total) return { success: true, stats: [] };
 
-  const rows = sheet.getDataRange().getValues();
+  const ansSheet = ss.getSheetByName("answers-events");
+  const rows = ansSheet ? ansSheet.getDataRange().getValues() : [[]];
   const h = {};
   rows[0].forEach((v, i) => h[v] = i);
-
-  // イベントの総数
-  const eventIds = [...new Set(rows.slice(1).map(r => r[h["eventId"]]).filter(Boolean))];
-  const total = eventIds.length;
-  if (!total) return { success: true, stats: [] };
 
   const stats = members.map(m => {
     const participated = rows.slice(1).filter(r =>
