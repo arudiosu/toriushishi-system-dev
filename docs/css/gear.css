@@ -56,7 +56,7 @@
   padding: 3px 10px;
 }
 .gear-tag-memo { background: transparent; border: 1px solid var(--border); color: var(--text-3); }
-.member-gear-tags { position: absolute; right: 90px; top: 50%; transform: translateY(-50%); justify-content: flex-end; max-width: 50%; }
+.member-gear-tags { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); justify-content: flex-end; max-width: 50%; }
 
 /* 未配布在庫 */
 .gear-spare-group { margin-bottom: 20px; }
