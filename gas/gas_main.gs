@@ -26,9 +26,10 @@ function getEventsWithStatsGAS(userId) {
     const id = Number(r[U["userId"]]);
     const name = r[U["storedName"]];
     const status = r[U["status"]];
+    const createdAt = r[U["created_at"]];
 
     userIdNameMap[id] = name;
-    if (status === "active") activeUsers.push({ id, name });
+    if (status === "active") activeUsers.push({ id, name, createdAt });
   });
 
   const EHEAD = eventsData[0];
@@ -69,6 +70,16 @@ function getEventsWithStatsGAS(userId) {
     const eid = ev.eventId;
     const list = answersMap[eid] || [];
 
+    // イベント日付（比較用）
+    const evDate = ev.date instanceof Date ? ev.date : new Date(String(ev.date).replace(/\//g, "-"));
+
+    // イベント日時点で登録済みのメンバーのみ対象
+    const eligibleUsers = activeUsers.filter(u => {
+      if (!u.createdAt) return true;
+      const regDate = u.createdAt instanceof Date ? u.createdAt : new Date(String(u.createdAt).replace(/\//g, "-"));
+      return regDate <= evDate;
+    });
+
     let yes = 0, no = 0, na = 0;
     let myStatus = "未回答";
 
@@ -78,7 +89,7 @@ function getEventsWithStatsGAS(userId) {
     const answerMap = {};
     list.forEach(a => answerMap[a.userId] = a.status);
 
-    activeUsers.forEach(u => {
+    eligibleUsers.forEach(u => {
       const status = answerMap[u.id];
 
       if (!status) {
@@ -97,7 +108,7 @@ function getEventsWithStatsGAS(userId) {
     });
 
     const answered = [...yesNames, ...noNames];
-    const naNames = activeUsers
+    const naNames = eligibleUsers
       .filter(u => !answered.includes(u.name))
       .map(u => u.name);
 

@@ -723,6 +723,12 @@ function initShishimaru() {
         if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMemo(); }
     });
 
+    document.getElementById("shishiRefreshBtn")?.addEventListener("click", () => {
+        const activeTab = document.querySelector(".shishi-tab-btn.active")?.dataset.shishiTab;
+        if (activeTab === "memo") loadMemos();
+        else loadParticipationStats();
+    });
+
     loadParticipationStats();
 }
 
