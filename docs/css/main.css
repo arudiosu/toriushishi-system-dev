@@ -31,6 +31,9 @@
 ======================================================= */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* iOSズーム防止：フォームコントロールは最低16px */
+input, textarea, select { font-size: 16px; }
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
   font-size: 16px;

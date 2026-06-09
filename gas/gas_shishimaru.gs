@@ -131,11 +131,20 @@ function getMemosGAS() {
   const sheet = ensureMemoSheet();
   const rows = sheet.getDataRange().getValues();
   const headers = rows[0];
+  const dateIdx = headers.indexOf("date");
   const memos = rows.slice(1)
     .filter(r => r[0])
     .map(r => {
       const obj = {};
-      headers.forEach((h, i) => obj[h] = r[i]);
+      headers.forEach((h, i) => {
+        if (i === dateIdx) {
+          obj[h] = r[i] instanceof Date
+            ? Utilities.formatDate(r[i], "Asia/Tokyo", "yyyy/MM/dd HH:mm")
+            : String(r[i] || "");
+        } else {
+          obj[h] = r[i];
+        }
+      });
       return obj;
     })
     .reverse();
