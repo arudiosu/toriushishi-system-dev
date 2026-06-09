@@ -1,5 +1,5 @@
 // =======================================================
-// 装備管理
+// 衣装管理
 // =======================================================
 
 const GEAR_FIELDS = ["happi_no", "tshirt_size", "tekkou", "hakama", "kimono_top", "kimono_bottom", "memo"];
@@ -69,7 +69,7 @@ function renderGearList() {
 
 function openGearEdit(member) {
     gearEditTargetUserId = member.userId;
-    document.getElementById("gearEditTitle").textContent = `装備編集：${member.name}`;
+    document.getElementById("gearEditTitle").textContent = `衣装編集：${member.name}`;
     const g = member.gear || {};
     GEAR_FIELDS.forEach(f => {
         const el = document.getElementById("gEdit_" + f);

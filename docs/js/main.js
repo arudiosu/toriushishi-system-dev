@@ -413,7 +413,7 @@ document.querySelectorAll(".tab-item").forEach(tab => {
         if (targetTab === "event-management") { if (userRole === "user") { alert("管理者のみアクセスできます。"); return; } openCreateForm(); return; }
         if (targetTab === "practice-management") { if (userRole === "user") { alert("管理者のみアクセスできます。"); return; } openPracticeCreateForm(); return; }
         if (targetTab === "otabi-management") { if (userRole === "user") { alert("管理者のみアクセスできます。"); return; } openOtabiCard(); return; }
-        if (targetTab === "gear-management") { openGearCard(); return; }
+        if (targetTab === "gear-management") { if (userRole === "user") { alert("管理者のみアクセスできます。"); return; } openGearCard(); return; }
         if (targetTab === "mypage") { openMyPage(); return; }
     });
 });
