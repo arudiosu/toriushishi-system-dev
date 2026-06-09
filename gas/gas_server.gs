@@ -166,6 +166,18 @@ function doPost(e) {
         result = saveGearGAS(data.targetUserId, data.gear, data.userId);
         break;
 
+      case "getGearSpare":
+        result = getGearSpareGAS();
+        break;
+
+      case "addGearSpare":
+        result = addGearSpareGAS(data.item_type, data.value, data.memo, data.userId);
+        break;
+
+      case "deleteGearSpare":
+        result = deleteGearSpareGAS(data.spare_id, data.userId);
+        break;
+
       default:
         result = { success: false, msg: "unknown action" };
     }

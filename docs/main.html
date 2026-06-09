@@ -584,7 +584,31 @@
         </div>
         <button class="close-card-btn" data-target="gear-management">戻る</button>
         <h2>装備管理</h2>
-        <div id="gearList"></div>
+        <div class="gear-tab-bar">
+            <button class="gear-tab-btn active" data-gear-tab="members">メンバー</button>
+            <button class="gear-tab-btn" data-gear-tab="spare">未配布在庫</button>
+        </div>
+        <div class="gear-tab-pane active" id="gearMembersPane">
+            <div id="gearList"></div>
+        </div>
+        <div class="gear-tab-pane" id="gearSparePane">
+            <div id="gearSpareList"></div>
+            <div id="gearSpareAdminArea" style="display:none;">
+                <div class="gear-spare-add-form">
+                    <select id="gSpareType">
+                        <option value="法被">法被</option>
+                        <option value="Tシャツ">Tシャツ</option>
+                        <option value="手甲">手甲</option>
+                        <option value="はかま">はかま</option>
+                        <option value="着物上">着物上</option>
+                        <option value="着物下">着物下</option>
+                    </select>
+                    <input type="text" id="gSpareValue" placeholder="番号・サイズなど">
+                    <input type="text" id="gSpareMemo" placeholder="メモ（任意）">
+                    <button id="gSpareAddBtn">追加</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- 装備編集カード（管理者） -->
@@ -593,24 +617,8 @@
         <h2 id="gearEditTitle">装備編集</h2>
         <div class="gear-edit-body">
             <div class="gear-edit-section">
-                <div class="gear-section-label">担当楽器</div>
-                <div class="gear-checks">
-                    <label class="gear-check-label"><input type="checkbox" id="gEdit_odaiko"> 大太鼓</label>
-                    <label class="gear-check-label"><input type="checkbox" id="gEdit_kotaiko"> 小太鼓</label>
-                    <label class="gear-check-label"><input type="checkbox" id="gEdit_shishi"> 獅子</label>
-                </div>
-            </div>
-            <div class="gear-edit-section">
-                <label class="gear-field-label">芸</label>
-                <input type="text" id="gEdit_art" placeholder="例：三繰①">
-            </div>
-            <div class="gear-edit-section">
                 <label class="gear-field-label">法被番号</label>
                 <input type="text" id="gEdit_happi_no" placeholder="例：10">
-            </div>
-            <div class="gear-edit-section">
-                <label class="gear-field-label">はっぴ R8</label>
-                <input type="text" id="gEdit_happi_r8" placeholder="例：9">
             </div>
             <div class="gear-edit-section">
                 <label class="gear-field-label">Tシャツサイズ</label>
