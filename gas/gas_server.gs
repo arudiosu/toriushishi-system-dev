@@ -142,6 +142,10 @@ function doPost(e) {
         result = getOtabiDonationsGAS(data.year);
         break;
 
+      case "saveOtabiDonations":
+        result = saveOtabiDonationsGAS(data.donations);
+        break;
+
       case "getParticipationStats":
         result = getParticipationStatsGAS(data.filter || "event");
         break;

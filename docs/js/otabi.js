@@ -320,42 +320,89 @@ async function shareOtabiSchedule() {
     }
 }
 
-// ===== お花代 =====
+// ===== お花代（Excel風一括入力） =====
+
+let otabiDonEntries = [];      // 表示中グループのエントリ
+let otabiDonGroup = "上組";
 
 async function loadOtabiDonations() {
     document.getElementById("otabiDonYear").textContent = otabiYear;
-    const area = document.getElementById("otabiDonationSummary");
-    area.innerHTML = '<div class="skeleton skeleton-card"></div>';
+    document.querySelectorAll(".otabi-don-group-btn").forEach(b =>
+        b.classList.toggle("active", b.dataset.group === otabiDonGroup));
+    const grid = document.getElementById("otabiDonationGrid");
+    grid.innerHTML = '<div class="skeleton skeleton-card"></div>';
     const res = await callGasApi({ action: "getOtabiDonations", year: otabiYear });
-    renderOtabiDonations(res);
+    const all = (res.success && res.entries) ? res.entries : [];
+    otabiDonEntries = all.filter(e => e.group === otabiDonGroup);
+    renderOtabiDonations();
 }
 
-function renderOtabiDonations(data) {
-    const area = document.getElementById("otabiDonationSummary");
-    if (!data.success || !data.entries || !data.entries.length) {
-        area.innerHTML = '<p class="no-event">お花代の記録がありません</p>';
+function renderOtabiDonations() {
+    const grid = document.getElementById("otabiDonationGrid");
+    if (!otabiDonEntries.length) {
+        grid.innerHTML = '<p class="no-event">スケジュールが登録されていません</p>';
+        updateDonationTotal();
         return;
     }
-    const byGroupHtml = Object.entries(data.byGroup || {}).map(([g, amt]) =>
-        `<div class="otabi-don-row"><span>${g}</span><span>￥${amt.toLocaleString()}</span></div>`
-    ).join('');
-    const detailHtml = data.entries.map(e => `
-        <div class="otabi-item">
-            <div class="otabi-item-body">
-                <div class="otabi-item-title">${e.place_name}</div>
-                <div class="otabi-item-sub">${e.group} No.${e.no} ${e.time || ''}</div>
-            </div>
-            <div class="otabi-donation-badge">￥${e.donation.toLocaleString()}</div>
+    grid.innerHTML = `
+        <div class="otabi-don-grid-head">
+            <span class="dg-no">No.</span>
+            <span class="dg-name">訪問先</span>
+            <span class="dg-amount">お花代</span>
+        </div>
+    ` + otabiDonEntries.map((e, i) => `
+        <div class="otabi-don-grid-row">
+            <span class="dg-no">${e.no || '-'}</span>
+            <span class="dg-name">${e.place_name || ''}</span>
+            <span class="dg-amount">
+                <input type="number" inputmode="numeric" class="dg-input"
+                       data-idx="${i}" value="${e.donation || ''}"
+                       placeholder="0" min="0" step="500" />
+            </span>
         </div>
     `).join('');
-    area.innerHTML = `
-        <div class="otabi-don-card">
-            ${byGroupHtml}
-            <div class="otabi-don-row total">合計 <span>￥${(data.total||0).toLocaleString()}</span></div>
-        </div>
-        <div class="event-status">明細</div>
-        ${detailHtml}
-    `;
+
+    const inputs = [...grid.querySelectorAll(".dg-input")];
+    inputs.forEach((input, idx) => {
+        input.addEventListener("input", () => {
+            otabiDonEntries[idx].donation = Number(input.value) || 0;
+            updateDonationTotal();
+        });
+        // Enter / 下矢印で次の行へ（Excel風）
+        input.addEventListener("keydown", ev => {
+            if (ev.key === "Enter" || ev.key === "ArrowDown") {
+                ev.preventDefault();
+                (inputs[idx + 1] || inputs[0])?.focus();
+            } else if (ev.key === "ArrowUp") {
+                ev.preventDefault();
+                (inputs[idx - 1] || inputs[inputs.length - 1])?.focus();
+            }
+        });
+        input.addEventListener("focus", () => input.select());
+    });
+    updateDonationTotal();
+}
+
+function updateDonationTotal() {
+    const total = otabiDonEntries.reduce((s, e) => s + (Number(e.donation) || 0), 0);
+    document.getElementById("otabiDonationTotal").innerHTML =
+        `${otabiDonGroup} 合計 <span>￥${total.toLocaleString()}</span>`;
+}
+
+async function saveOtabiDonations() {
+    if (!otabiDonEntries.length) return;
+    const donations = otabiDonEntries.map(e => ({ entry_id: e.entry_id, donation: Number(e.donation) || 0 }));
+    const btn = document.getElementById("saveDonationsBtn");
+    btn.disabled = true; btn.textContent = "保存中…";
+    try {
+        const res = await callGasApi({ action: "saveOtabiDonations", donations });
+        if (!res.success) throw new Error();
+        btn.textContent = "保存しました ✓";
+        setTimeout(() => { btn.textContent = "お花代を保存"; btn.disabled = false; }, 1500);
+    } catch (e) {
+        alert("保存中にエラーが発生しました");
+        btn.textContent = "お花代を保存"; btn.disabled = false;
+    }
 }
 
 // ===== 初期化 =====
@@ -370,6 +417,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("otabiSchedYearNext")?.addEventListener("click", () => { otabiYear++; loadOtabiSchedule(); });
     document.getElementById("otabiDonYearPrev")?.addEventListener("click",  () => { otabiYear--; loadOtabiDonations(); });
     document.getElementById("otabiDonYearNext")?.addEventListener("click",  () => { otabiYear++; loadOtabiDonations(); });
+    document.querySelectorAll(".otabi-don-group-btn").forEach(btn =>
+        btn.addEventListener("click", () => { otabiDonGroup = btn.dataset.group; loadOtabiDonations(); })
+    );
+    document.getElementById("saveDonationsBtn")?.addEventListener("click", saveOtabiDonations);
     document.getElementById("addPlaceBtn")?.addEventListener("click", () => openPlaceForm());
     document.getElementById("addEntryBtn")?.addEventListener("click", () => openBulkEntryForm());
     document.getElementById("addBulkRowBtn")?.addEventListener("click", () => addBulkRow());

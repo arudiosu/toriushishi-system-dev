@@ -247,6 +247,100 @@
   color: var(--accent);
 }
 
+/* --- お花代 Excel風入力 --- */
+.otabi-don-total-bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  color: var(--text-2);
+}
+.otabi-don-total-bar span {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.otabi-don-grid {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.otabi-don-grid-head,
+.otabi-don-grid-row {
+  display: grid;
+  grid-template-columns: 44px 1fr 110px;
+  align-items: center;
+}
+.otabi-don-grid-head {
+  background: var(--surface-3);
+  font-size: .72rem;
+  font-weight: 700;
+  color: var(--text-3);
+  letter-spacing: .04em;
+}
+.otabi-don-grid-head > span { padding: 8px 10px; }
+.otabi-don-grid-row {
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+.otabi-don-grid-row:nth-child(even) { background: var(--surface-2); }
+.dg-no {
+  text-align: center;
+  font-weight: 700;
+  color: var(--text-2);
+  font-size: .85rem;
+}
+.dg-name {
+  padding: 8px 10px;
+  font-size: .9rem;
+  color: var(--text-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dg-amount { padding: 4px 6px; }
+.dg-input {
+  width: 100%;
+  box-sizing: border-box;
+  text-align: right;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 8px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text-1);
+}
+.dg-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--surface-3);
+}
+
+.otabi-don-group-btn {
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  padding: 6px 14px;
+  font-size: .85rem;
+  cursor: pointer;
+}
+.otabi-don-group-btn:first-child { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+.otabi-don-group-btn:last-child { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+.otabi-don-group-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
 /* --- フォームカード --- */
 .otabi-form-card {
   overflow-y: auto;

@@ -187,8 +187,9 @@ function getOtabiDonationsGAS(year) {
   const P = {};
   headers.forEach((h, i) => { P[h] = i; });
 
+  // その年の全エントリ（お花代0も含む＝入力対象）
   const entries = data.slice(1)
-    .filter(row => row[0] && String(row[P["year"]]) === String(year) && Number(row[P["donation"]]) > 0)
+    .filter(row => row[0] && String(row[P["year"]]) === String(year))
     .map(row => ({
       entry_id: row[P["entry_id"]],
       group: row[P["group"]],
@@ -198,7 +199,7 @@ function getOtabiDonationsGAS(year) {
         : String(row[P["time"]] || ""),
       place_name: row[P["place_name"]],
       memo: row[P["memo"]],
-      donation: Number(row[P["donation"]])
+      donation: Number(row[P["donation"]]) || 0
     }))
     .sort((a, b) => a.group.localeCompare(b.group) || Number(a.no) - Number(b.no));
 
@@ -207,4 +208,31 @@ function getOtabiDonationsGAS(year) {
   entries.forEach(e => { byGroup[e.group] = (byGroup[e.group] || 0) + e.donation; });
 
   return { success: true, entries, total, byGroup };
+}
+
+// お花代だけをまとめて更新（Excel風一括入力用）
+function saveOtabiDonationsGAS(donations) {
+  const { schedSheet } = ensureOtabiSheets();
+  const now = new Date();
+  const data = schedSheet.getDataRange().getValues();
+  const headers = data[0];
+  const P = {};
+  headers.forEach((h, i) => { P[h] = i + 1; });
+
+  const rowById = {};
+  for (let r = 2; r <= data.length; r++) {
+    const id = Number(data[r - 1][0]);
+    if (id > 0) rowById[id] = r;
+  }
+
+  let count = 0;
+  (donations || []).forEach(d => {
+    const r = rowById[Number(d.entry_id)];
+    if (!r) return;
+    schedSheet.getRange(r, P["donation"]).setValue(Number(d.donation) || 0);
+    schedSheet.getRange(r, P["updated_at"]).setValue(now);
+    count++;
+  });
+
+  return { success: true, count };
 }
