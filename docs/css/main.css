@@ -1051,7 +1051,7 @@ input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(.7); opac
 #memoInput {
   flex: 1;
   padding: 8px 14px;
-  font-size: 14px;
+  font-size: 16px;
   border-radius: 16px;
   border: 1px solid var(--border);
   background: var(--surface-2);

@@ -73,6 +73,11 @@ function initBottomNav() {
             btn.classList.add("active");
             document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
             document.getElementById(target).classList.add("active");
+            const memoInputArea = document.getElementById("memoInputArea");
+            if (memoInputArea) {
+                const isMemoTabActive = document.querySelector(".shishi-tab-btn.active")?.dataset.shishiTab === "memo";
+                memoInputArea.style.display = (target === "chat" && isMemoTabActive) ? "flex" : "none";
+            }
         });
     });
 }
